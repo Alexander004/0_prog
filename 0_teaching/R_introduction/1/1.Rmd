@@ -1,7 +1,7 @@
 ---
 title: "Seminar 1"
 author: "Aleksander Konkin"
-date: "2023-01-19"
+date: "2023-03-29"
 output: html_document
 ---
 
@@ -15,11 +15,12 @@ Another option is to use the sign \# to leave comments
 
 ```{r}
 ### R as calculator. Mathematical symbols: +, -, *, /, ^
-
+"france"
 1+1
 2-1
 4/2
 4^2
+print(2^2)
 ```
 
 ```{r}
@@ -34,6 +35,12 @@ log(1, base=10)
 
 **Help call commands** if you forget something: *help( )*, *?*
 
+```{r}
+help(sum)
+?print
+```
+
+
 **Assignment operators**: \<-, =
 
 Methods for **manual data entry** in R: function *c( )*
@@ -41,12 +48,14 @@ Methods for **manual data entry** in R: function *c( )*
 # Task 1
 
 Calculate ENP for the 2011 Duma elections using the formula by G.V.Golosov (2011)
-
 ```{r}
 # First option
 index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
 sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+```
 
+
+```{r}
 # Second option
 sum_index_2011<-0
 for(i in index_2011)#for...in expression loop

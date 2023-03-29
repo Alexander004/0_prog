@@ -1,0 +1,68 @@
+---
+title: "project_Polina"
+output: html_document
+date: "2023-03-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+repression <- read_delim("~/0_programming/0_HSE_study/нис/project_polina/Data/repression.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+repression
+```
+```{r}
+model <- lm(repression ~ regional_capital*protest_frequency, data = repression)
+summary(model)
+```
+```{r}
+model_1 <- lm(repression ~ protest_frequency, data = repression)
+summary(model_1)
+```
+```{r}
+plot(model_1)
+```
+We can see that SPB and Moscow are outliners, we should get rid of them
+
+```{r}
+repression_1 <- repression[-c(157, 158), ]
+repression_1
+```
+```{r}
+model_3 <- lm(repression ~ regional_capital*protest_frequency, data = repression_1)
+summary(model_3)
+```
+```{r}
+model_4 <- lm(repression ~ regional_capital*log(protest_frequency+1), data = repression_1)
+summary(model_4)
+```
+```{r}
+plot(model_4)
+```
+```{r}
+require(margins)
+library(ggplot2)
+margins.model <- cplot(model_4, dx = "protest_frequency", x = "regional_capital", what = "effect", draw=F)
+ggplot(data = margins.model, aes(x = xvals, y = yvals)) + 
+  geom_line(color = "red") + 
+  geom_ribbon(alpha = .2, aes(ymin = lower, ymax = upper)) + 
+  geom_hline(yintercept = 0, linetype = "dashed") 
+```
+```{r}
+model_money <- lm(log(repression+1) ~ city_grp, data = repression_1)
+summary(model_money)
+ggplot(repression_1, aes (x=city_grp, y=log(repression+1))) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+```{r}
+ggplot(repression_1, aes (x=log(protest_frequency+1), y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+
+
+
