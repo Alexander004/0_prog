@@ -1,0 +1,99 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-01"
+---
+
+```{r}
+library(stats)
+
+# create matrix for Abuse of Power without Independent party affiliation
+abuse_matrix <- matrix(c(47, 19, 14, 43), nrow = 2, dimnames = list(Voting = c("Yes", "No"), Party = c("Democrats", "Republicans")))
+abuse_matrix
+```
+```{r}
+# run chi-squared test
+abuse_chisq <- chisq.test(abuse_matrix)
+abuse_chisq
+
+#Interpretation: The chi-squared test results in a p-value of 6.382e-07, which is less than 0.05, indicating that we reject the null #hypothesis that party affiliation and voting on impeachment trial are independent.
+
+# get hypothetical values
+abuse_chisq$expected
+```
+
+
+```{r}
+# create matrix for Abuse of Power with Independent party affiliation
+abuse_matrix_i <- matrix(c(47, 19, 14, 43, 4, 1), nrow = 2, dimnames = list(Voting = c("Yes", "No"), Party = c("Democrats", "Republicans", "Independent")))
+abuse_matrix_i
+```
+```{r}
+# make balloonplot
+library(gplots)
+abuse_table <- as.table(abuse_matrix_i)
+balloonplot(abuse_table, show.margins = FALSE, xlab = "", ylab = "", main = "Abuse of Power")
+
+```
+```{r}
+# run chi-squared test
+abuse_chisq_i <- chisq.test(abuse_matrix_i)
+abuse_chisq_i
+
+#Interpretation: The chi-squared test results in a p-value of 6.778e-07, which is less than 0.05, indicating that we reject the null #hypothesis that party affiliation and voting on impeachment trial are independent.
+
+# get hypothetical values
+abuse_chisq_i$expected
+```
+
+```{r}
+# get extended chi-squared output
+library(gmodels)
+CrossTable(abuse_matrix_i, chisq = TRUE, expected = TRUE, prop.r = FALSE, prop.c = FALSE, prop.t = FALSE)
+```
+
+```{r}
+# create matrix for Obstruction of Congress without Independent party affiliation
+obstruction_matrix <- matrix(c(35, 27, 42, 28), nrow = 2, dimnames = list(Voting = c("Yes", "No"), Party = c("Democrats", "Republicans")))
+obstruction_matrix
+```
+
+```{r}
+# run chi-squared test
+obstruction_chisq <- chisq.test(obstruction_matrix)
+obstruction_chisq
+
+#Interpretation: The chi-squared test results in a p-value of 0.8136, which is greater than 0.05, indicating that we fail to reject the null hypothesis that party affiliation and voting on impeachment trial are independent.
+
+# get hypothetical values
+obstruction_chisq$expected
+```
+
+```{r}
+# create matrix for Obstruction of Congress with Independent party affiliation
+obstruction_matrix_i <- matrix(c(35, 27, 42, 28, 3, 2), nrow = 2, dimnames = list(Voting = c("Yes", "No"), Party = c("Democrats", "Republicans", "Independent")))
+obstruction_matrix_i
+```
+```{r}
+# make balloonplot
+obstruction_table <- as.table(obstruction_matrix_i)
+balloonplot(obstruction_table, xlab = "", ylab = "", main = "Obstruction of Congress")
+```
+
+```{r}
+# run chi-squared test
+obstruction_chisq_i <- chisq.test(obstruction_matrix_i)
+obstruction_chisq_i
+
+#Interpretation: The chi-squared test results in a p-value of 0.9158, which is greater than 0.05, indicating that we fail to reject the null hypothesis that party affiliation and voting on impeachment trial are independent.
+
+# get hypothetical values
+obstruction_chisq_i$expected
+```
+
+```{r}
+# get extended chi-squared output
+CrossTable(obstruction_matrix_i, chisq = TRUE, expected = TRUE, prop.r = FALSE, prop.c = FALSE, prop.t = FALSE)
+```
+
+

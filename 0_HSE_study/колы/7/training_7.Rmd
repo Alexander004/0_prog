@@ -1,0 +1,231 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-01"
+---
+```{r}
+library(readr)
+Pol_Stab <- read_csv("~/0_HSE_study/колы/7/Data/Pol_Stab.csv")
+Gov_eff <- read_csv("~/0_HSE_study/колы/7/Data/Gov_eff.csv")
+Rule_of_law <- read_csv("~/0_HSE_study/колы/7/Data/Rule_of_law.csv")
+head(Pol_Stab)
+
+### I did this task before Aleksey Borisovich sent the dataset and downloaded all of them myself. They downloaded as three different datasets therefore i had to unite them manually. I spoke about it with Aleksey Borisovich and he was okay with it.
+```
+```{r}
+summary(Pol_Stab) ### There are a lot of duplicate values for some reason, so i am filtering the data leaving only unique ones
+Pol <- unique(Pol_Stab)
+summary(Pol)
+names(Pol) <- c("Country", "Political Stability") ### Renaming the column
+head(Pol)
+```
+```{r}
+library(dplyr)
+Pol_asc <- arrange(Pol, Country) ### Making an ascending order 
+Pol_asc
+```
+
+```{r}
+Gov <- unique(Gov_eff) ### Doing the same thing with other values
+names(Gov) <- c("Country", "Government Effectiveness")
+Gov_asc <- arrange(Gov, Country)
+Gov_asc
+```
+```{r}
+Law <- unique(Rule_of_law)
+names(Law) <- c("Country", "Rule of Law")
+Law_asc <- arrange(Law, Country)
+Law_asc
+```
+```{r}
+WGI <- merge(Pol_asc, Gov_asc, by = "Country") %>%
+                  merge(Law_asc, by = "Country")
+WGI <- WGI %>% 
+  mutate(Country = gsub("Türkiye", "Turkiye", Country))
+WGI ### Merging into one dataset for these three values from WGI
+```
+```{r}
+worldBank <- read_csv("~/0_HSE_study/колы/7/Data/WorldBankData.csv", 
+    col_types = cols(`2020 [YR2020]` = col_number()))
+wb_data_selected <- select(worldBank, 1, 3, 5) ## Leaving only important values
+names(wb_data_selected) <- c("Country", "Category", "Value")
+wb_data_selected <- na.omit(wb_data_selected)
+wb_data_selected
+```
+```{r}
+library(tidyr)
+
+# Create separate columns for each variable
+WB <- spread(wb_data_selected, key = Category, value = Value)
+
+WB <- WB %>% 
+  mutate(Country = gsub("Czechia", "Czech Republic", Country)) ## Countries are named different in different datasets
+WB
+
+```
+```{r}
+WGI_WB <- merge(WGI, WB, by = "Country") ## merging them
+WGI_WB
+```
+```{r}
+library(readxl)
+Aggregate_Category_and_Subcategory_Scores_FIW_2003_2022 <- read_excel("~/0_HSE_study/колы/7/Data/Aggregate_Category_and_Subcategory_Scores_FIW_2003-2022.xlsx", 
+    sheet = "FIW06-22")
+FH_sel <- select(Aggregate_Category_and_Subcategory_Scores_FIW_2003_2022, 1, 2, 4, 13, 18)
+FH_sel
+```
+```{r}
+FH_sel_2020 <- FH_sel %>% filter(Edition == "2020") ### taking data only for 2020
+FH_sel_2020_e <- FH_sel_2020 %>% filter(Region == "Europe" | Region == "Eurasia") ## Taking region europe and adding to them countrie that are not considered europe for some reason
+FH_sel_2020_e <- FH_sel_2020_e %>% mutate(Country = gsub("Russia", "Russian Federation", Country))
+FH_sel_2020_e <- FH_sel_2020_e %>% mutate(Country = gsub("Slovakia", "Slovak Republic", Country))
+FH_sel_2020_e <- FH_sel_2020_e %>% mutate(Country = gsub("Turkey", "Turkiye", Country))
+FH_sel_2020_selected <- select(FH_sel_2020_e, 1, 4, 5)
+FH_sel_2020_selected
+```
+```{r}
+All_data <- merge(WGI_WB, FH_sel_2020_selected, by = "Country")
+All_data_cleared <- na.omit(All_data)
+All_data_cleared 
+colnames(All_data_cleared) <- c("Country", "Political Stability", "Government Effectiveness", "Rule of Law", "GDP per capita", "Population growth", "Political Rights", "Civil Liberties")
+```
+Well i guess I did the dataset......
+Hopefully minor nations excluded are not very important
+
+########
+2. Implement the following paired correlations: (1) Political Stability – Government Effectiveness, (2) Political Stability – Rule of Law, (3) Political Stability – Political Rights, (4) Political Stability – Civil Liberties, (5) Political Stability – GDP per capita and (6) Political stability – Population growth. 
+
+i. Before proceeding to the paired correlations, check the variables in each pair for parametricity. Use # for a short interpretation of the tests output for each pair: what correlation coefficient (Pearson or Spearman) should be calculated for the respective pair and why.
+ii. Interpret the results of the correlation analysis in each of the pairs. What does the correlation coefficient mean for each pair of variables in terms of direction and strength of relationship? Can it be treated as significant (can the H0 for correlation test be rejected)? Give a brief comment for each pair with #
+
+```{r}
+#(1) Political Stability – Government Effectiveness
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`Government Effectiveness`) #p-value = 0.05484 > 0.05 - normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`Government Effectiveness`) #p-value = 0.2979 > 0.05 - hom var
+
+### The data is parametric therefore we have to use pearson test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`Rule of Law`, method = "pearson")#p-value = 4.393e-16
+
+### The correlation is statistically significant (H0 can be rejected). It is positive and rather strong. cor = 0.8791252    
+```
+```{r}
+#(2) Political Stability – Rule of Law
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`Rule of Law`) #p-value = 0.01703 < 0.05 - not normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`Rule of Law`) #p-value = 0.1269 > 0.05 - hom var
+
+### The data is not parametric therefore we have to use spearman test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`Rule of Law`, method = "spearman")#p-value < 2.2e-16
+
+### The correlation is statistically significant (H0 can be rejected). It is positive and rather strong. cor = 0.8858696   
+```
+```{r}
+#(3) Political Stability – Political Rights
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`Political Rights`) #p-value = 2.041e-07 < 0.05 - not normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`Political Rights`) #p-value < 2.2e-16 < 0.05 - not hom var
+
+### The data is not parametric therefore we have to use spearman test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`Political Rights`, method = "spearman")#p-value = 2.955e-09
+
+### The correlation is statistically significant (H0 can be rejected). It is positive and rather strong. cor = 0.7392306   
+```
+
+```{r}
+#(4) Political Stability – Civil Liberties
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`Civil Liberties`) #p-value = 2.085e-06 < 0.05 - not normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`Civil Liberties`) #p-value < 2.2e-16 < 0.05 - not hom var
+
+### The data is not parametric therefore we have to use spearman test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`Civil Liberties`, method = "spearman")#p-value = 6.662e-16
+
+### The correlation is statistically significant (H0 can be rejected). It is positive and rather strong. cor = 0.8767242 
+```
+
+```{r}
+#(5) Political Stability – GDP per capita
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`GDP per capita`) #p-value = 5.674e-10 < 0.05 - not normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`GDP per capita`) #p-value < 2.2e-16 < 0.05 - not hom var
+
+### The data is not parametric therefore we have to use spearman test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`GDP per capita`, method = "spearman")#p-value = 0.4871
+
+### The correlation is not statistically significant (H0 cannot be rejected). It is positive and weak. cor = 0.1036078   
+```
+```{r}
+#(6) Political stability – Population growth. 
+# Firstly we need to check the data for parametricity
+shapiro.test(All_data_cleared$`Political Stability`) #p-value = 0.05009 > 0.05 - normally dist
+shapiro.test(All_data_cleared$`Population growth`) #p-value = 0.2532 < 0.05 - not normally dist
+var.test(All_data_cleared$`Political Stability`, All_data_cleared$`Population growth`) #p-value = 0.7888 > 0.05 - hom var
+
+### We proved that data is parametric therefore we have to use pearson test
+
+cor.test(All_data_cleared$`Political Stability`, All_data_cleared$`Population growth`, method = "spearman")#p-value = 5.688e-05
+
+### The correlation is statistically significant (H0 can be rejected). It is positive and rather strong. cor = 0.5602451  
+```
+```{r}
+### We should delete country column to  make this work
+all_data_new <- select(All_data_cleared, -1)
+all_matrix <- cor(all_data_new)
+all_matrix
+```
+```{r}
+library(GGally)
+ggpairs(all_data_new)
+```
+
+
+3. Create a correlation matrix using corrplot(). Use the alphabetic clustering order for the correlated pairs of variables. The text color (color of variables’ labels) in the correlation matrix should be green.
+
+Tip 6: For the illustrative example of the correlation matrix design with corrplot() please check the script for Seminar 7.
+
+```{r}
+library(corrplot)
+corrplot(all_matrix, order = "alphabet", tl.col="green")
+```
+4. Remove statistically insignificant correlation coefficients from the correlation matrix:
+
+i.  at p=0.05
+ii. at p=0.01
+
+```{r}
+corrplot(all_matrix, type="upper", order="alphabet", tl.col = "green", p.mat = all_matrix, sig.level = 0.05, insig = "blank")
+### for some reason it says that none of them is statistically significant
+```
+
+```{r}
+corrplot(all_matrix, type="upper", order="alphabet", tl.col = "green", p.mat = all_matrix, sig.level = 0.01, insig = "blank")
+```
+
+```{r}
+#install.packages("Hmisc")
+```
+
+```{r}
+library(Hmisc)
+matrix = rcorr(as.matrix(all_data_new))
+corrplot(matrix$r, type="upper", order="alphabet", tl.col = "green", p.mat = matrix$P, sig.level = 0.05, insig = "blank")
+```
+```{r}
+corrplot(matrix$r, type="upper", order="alphabet", tl.col = "green", p.mat = matrix$P, sig.level = 0.01, insig = "blank")
+```
+```{r}
+write.csv(All_data_cleared, "All_data_cleared_2.csv")
+```
+
+

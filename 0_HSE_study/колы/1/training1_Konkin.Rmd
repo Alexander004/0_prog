@@ -1,0 +1,170 @@
+---
+title: "training1"
+output: html_document
+date: "2023-01-24"
+---
+
+```{r}
+sample1<-c(1, 101, 201, 34, 56, 70, 11, 15, 2, 3)
+### First step - find mean value
+mean(sample1)
+```
+```{r}
+### Find X-μ
+sub<-(sample1 - mean(sample1))
+sub
+```
+```{r}
+### Find (X-μ)^2
+sq<-(sub^2)
+sq
+```
+```{r}
+### Sum of (X-μ)^2
+s = sum(sq)
+s
+```
+```{r}
+### Find Sum of (X-μ)^2/n-1 (for sample)
+variance = s/(length(sample1)-1)
+variance
+```
+```{r}
+### Find Standart Deviation (square root of variance)
+sdt1 = sqrt(variance)
+sdt1
+```
+```{r}
+### Let's check
+sd(sample1)
+```
+It's correct! Wow .... very cool. =)
+
+Sample #2
+```{r}
+sample2<-c(44, 55, 66, 77, 88, 99, 111, 22, 33, 44, 55, 55, 66, 77, 88)
+### First step - find mean value
+mean(sample2)
+
+### Find X-μ
+sub<-(sample2 - mean(sample2))
+sub
+
+### Find (X-μ)^2
+sq<-(sub^2)
+sq
+
+### Sum of (X-μ)^2
+s = sum(sq)
+s
+
+### Find Sum of (X-μ)^2/n-1 (for sample)
+variance = s/(length(sample2)-1)
+variance
+
+### Find Standart Deviation (square root of variance)
+sdt2 = sqrt(variance)
+sdt2
+```
+```{r}
+sd(sample2)
+```
+Sample #3
+```{r}
+sample3<-c(0, 1, 2, 3, 5, 4, 7, 8)
+### First step - find mean value
+mean(sample3)
+
+### Find X-μ
+sub<-(sample3 - mean(sample3))
+sub
+
+### Find (X-μ)^2
+sq<-(sub^2)
+sq
+
+### Sum of (X-μ)^2
+s = sum(sq)
+s
+
+### Find Sum of (X-μ)^2/n-1 (for sample)
+variance = s/(length(sample3)-1)
+variance
+
+### Find Standart Deviation (square root of variance)
+sdt3 = sqrt(variance)
+sdt3
+```
+```{r}
+sd(sample3)
+```
+Sample #4
+```{r}
+sample4<-c(112, 1, 36, 34, 33, 32, 31, 35, 29, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+### First step - find mean value
+mean(sample4)
+
+### Find X-μ
+sub<-(sample4 - mean(sample4))
+sub
+
+### Find (X-μ)^2
+sq<-(sub^2)
+sq
+
+### Sum of (X-μ)^2
+s = sum(sq)
+s
+
+### Find Sum of (X-μ)^2/n-1 (for sample)
+variance = s/(length(sample4)-1)
+variance
+
+### Find Standart Deviation (square root of variance)
+sdt4 = sqrt(variance)
+sdt4
+```
+```{r}
+sd(sample4)
+```
+Sample #5
+```{r}
+sample5<-c(0.5, 0.44, 0.12, 6, 0.1, 7, 1, 0.15, 2, 0.22)
+### First step - find mean value
+mean(sample5)
+
+### Find X-μ
+sub<-(sample5 - mean(sample5))
+sub
+
+### Find (X-μ)^2
+sq<-(sub^2)
+sq
+
+### Sum of (X-μ)^2
+s = sum(sq)
+s
+
+### Find Sum of (X-μ)^2/n-1 (for sample)
+variance = s/(length(sample5)-1)
+variance
+
+### Find Standart Deviation (square root of variance)
+sdt5 = sqrt(variance)
+sdt5
+```
+```{r}
+sd(sample5)
+```
+Now let's create a table
+
+```{r}
+names<-c(1:5)
+sd_names<-c(sdt1,sdt2,sdt3,sdt4,sdt5)
+len_names<-c(length(sample1), length(sample2), length(sample3), length(sample4), length(sample5))
+table_1<-data.frame(names,sd_names,len_names)
+colnames(table_1)<-c("Smaple Name", "Standard Deviation", "Length")
+table_1
+```
+
+

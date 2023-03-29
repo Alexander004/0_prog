@@ -1,0 +1,152 @@
+---
+title: "The t test does its best"
+author: "Data Analysis in Sociology 2022"
+date: "Last edited `r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1: Are religious respondents more trustful to strangers?
+
+Load the World Values Survey dataset on Russia (folder “data”, **WV6_Russia.sav**).
+
+```{r}
+library(haven)
+WV6_Russia <- read_sav("~/0_teaching/DAS 2023/DAS 2023/data/WV6_Russia.sav")
+WV6_Russia
+```
+
+Examine whether the answers to the following questions are associated: “Independently of whether you attend religious services or not, would you say you are a religious person?” `(V147)` and “Generally speaking, would you say that most people can be trusted or that you need to be very careful in dealing with people?” `(V24)`.
+
+```{r}
+WV1 <- WV6_Russia %>% select(`V147`, `V24`)
+WV <- na.omit(WV1)
+WV
+```
+
+
+First, visualize both variables independently, 
+
+```{r}
+library(ggplot2)
+
+# Bar plot for V147
+ggplot(WV, aes(x = factor(V147))) + 
+  geom_bar() +
+  labs(x = "Religious person", y = "Count", title = "Distribution of Religious Person Variable")
+# Bar plot for V24
+ggplot(WV, aes(x = factor(V24))) + 
+  geom_bar() +
+  labs(x = "Trust in people", y = "Count", title = "Distribution of Trust in People Variable")
+```
+
+then plot them together to see the joint distribution, 
+
+```{r}
+# Stacked bar plot for both variables
+ggplot(WV, aes(x = factor(V24), fill = factor(V147))) +
+  geom_bar(position = "stack") +
+  labs(x = "Trust in people", y = "Count", title = "Joint Distribution of Religious Person and Trust in People Variables", fill = "Religious Person")
+```
+
+then run a formal test and interpret the results.
+
+```{r}
+chisq.test(table(WV$V147, WV$V24))
+```
+
+
+
+## Problem 2: Website A/B testing.
+
+Load the data on testing the website appearance (folder “data”, **abtest.csv**).
+
+```{r}
+library(readr)
+abtest <- read_csv("~/0_teaching/DAS 2023/DAS 2023/data/abtest.csv")
+abtest
+```
+
+An online computer game site has tested a new version of game interface. The success is measured by the number of tokens that players earned during one session. A control group (A) of new players was shown the old interface, while a randomly selected sample of new players (B) was playing in a new interface.
+
+Compare the two interfaces and make a conclusion whether the new interface was more successful in this experiment.
+
+```{r}
+library(ggplot2)
+
+ggplot(abtest, aes(x = cond, y = tokens)) +
+  geom_boxplot() +
+  labs(x = "Interface", y = "Tokens earned", title = "Comparison of Tokens Earned by Interface")
+```
+
+
+```{r}
+a <- abtest[abtest$cond == "A",]
+a
+b <- abtest[abtest$cond == "B",]
+b
+```
+
+
+```{r}
+shapiro.test(a$tokens)
+shapiro.test(b$tokens)
+var.test(a$tokens, b$tokens)
+```
+```{r}
+t.test(b$tokens, a$tokens, paired=F, var.equal=F, alternative = "greater")
+```
+
+
+
+## Problem 3: Should you stare at gulls? 
+
+![](https://cdn.mos.cms.futurecdn.net/N2coVNpAZeYjBeNi7dcoCJ.jpg)
+
+Greedy gulls stealing French fries (folder “data”, **gulldata.csv**)
+
+A group of biologists has collected a data set to investigate whether seagulls take a longer time to steal food when someone is staring at them. 
+
+For each gull, there are two observations: when a researcher was staring at it and when a researcher was looking away. In both conditions, the researchers measured the time before a seagull reaches a pack of French fries.
+
+You need to decide which one is a better strategy to protect one's food - to stare at the seagulls or to look away while eating.
+
+Visualize the difference in time, 
+
+```{r}
+gulldata <- read_csv("~/0_teaching/DAS 2023/DAS 2023/data/gulldata.csv")
+gulldata
+```
+
+use a formal test to decide whether the difference is statistically significant, 
+
+```{r}
+shapiro.test(gulldata$away)
+shapiro.test(gulldata$at)
+var.test(gulldata$away, gulldata$at)
+```
+
+check the assumptions, 
+
+```{r}
+t.test(gulldata$away, gulldata$at, var.equal=T, alternative = "two.sided")
+t.test(gulldata$away, gulldata$at, var.equal=T, alternative = "less")
+```
+
+and interpret the results.
+
+
+```{r}
+#install.packages("cowsay")
+library(cowsay)
+say(what="Well done! Be good people", 
+    by = "behindcat", 
+    type = "message")
+```
+
+
+
+THE END.

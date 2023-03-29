@@ -1,0 +1,147 @@
+---
+title: "One-way Analysis of Variance"
+author: "Data Analysis in Sociology"
+date: "3/24-25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Problem 1
+
+Is the level of alcohol sales the same across the Federal Districts of Russia? 
+
+The data come from <https://rosstat.gov.ru/> and <https://www.kaggle.com/dwdkills/alcohol-consumption-in-russia>
+
+Data file: `alcohol_districts.csv`
+
+```{r}
+library(readr)
+alcohol_districts <- read_csv("~/0_teaching/DAS 2023/DAS 2023/data/alcohol_districts.csv")
+alcohol_districts
+```
+
+
+Create an index showing the average sales of all the types of alcohol per region. Use `rowMeans()` to calculate the mean across several columns.
+
+```{r}
+# Calculate the average sales across all alcohol types
+avg_sales <- rowMeans(alcohol_districts[, c("wine", "beer", "vodka", "champagne", "brandy")])
+
+# Add the average sales as a new column to the data frame
+alcohol_districts$avg_sales <- avg_sales
+
+# Use aggregate() to calculate the average sales by region
+region_avg_sales <- aggregate(avg_sales ~ region, data = alcohol_districts, mean)
+
+# Print the results
+print(region_avg_sales)
+```
+
+Compare the average value of the index across the Federal Districts **in 2016**. 
+
+```{r}
+alcohol_2016 <- alcohol_districts[alcohol_districts$year == 2016,]
+
+# Calculate the mean of the average sales for each Federal District
+district_avg_sales <- aggregate(avg_sales ~ district, data = alcohol_2016, mean)
+
+# Print the results
+print(district_avg_sales)
+```
+
+Now try a new way of visualising pairwise comparisons. Read the example for the `ggbetweenstats()` function here and adapt the non-parametric test used in this example: <https://indrajeetpatil.github.io/ggstatsplot/articles/web_only/ggbetweenstats.html>.
+
+```{r}
+#install.packages("ggstatsplot")
+library(ggstatsplot)
+alcohol_2016
+```
+```{r}
+ggbetweenstats(
+  data = alcohol_2016,
+  x = district, ## grouping/independent variable
+  y = avg_sales, ## dependent variables
+  type = "np", ## type of statistics
+  xlab = "District", ## label for the x-axis
+  ylab = "Avarage Alcohol Sales", ## label for the y-axis
+  plot.type = "violin", ## type of plot
+  outlier.tagging = TRUE, ## whether outliers should be flagged
+  outlier.coef = 1.5, ## coefficient for Tukey's rule
+  outlier.label = region, ## label to attach to outlier values
+  outlier.label.args = list(color = "red"), ## outlier point label color
+  ## turn off messages
+  title = "Comparison of alcohol sales across districts (Year: 2016)",
+)
+```
+
+
+
+
+## Problem 2
+
+For tasks 2-3, use the file `so2.csv` from the data folder. The data set contains the result of a survey of software developers using the StackOverflow website.
+
+How is the subjective level of competence in programming related to coding experience?
+
+Do the most experienced developers feel they are the most proficient?
+
+Examine this relationship visually, then run a suitable statistical test, and show the effect size. 
+
+Variables: `ImpSyn`, `YearsCodePro`.
+
+
+```{r}
+library(readr)
+so <- read_csv("~/0_teaching/DAS 2023/DAS 2023/data/so.csv")
+so
+```
+
+
+Now try a new way of visualising distribution of numeric variable across groups-- a ridgeplot. 
+
+Read the example for the `geom_ridgeline` function here and adapt the code to our data: <https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html> (go to the "Density ridgeline plots" section)
+
+```{r}
+# install.packages("ggridges")
+library(ggridges)
+# put your code here
+```
+
+
+
+## Problem 3
+
+Are the more experienced programmers seriously older?
+
+Compare the age of respondents by their coding experience.
+
+First, visualise the relationship, then run a suitable statistical test, and show the effect size. 
+
+```{r}
+# put your code here
+```
+
+
+Finally, create a visualization with all the effects shown in the picture. Use `ggbetweenstats()`.
+
+Variables: `ImpSyn`, `Age`.
+
+```{r}
+library(ggstatsplot)
+# put your code here
+```
+
+
+
+
+
+
+
+
+
+
+
+

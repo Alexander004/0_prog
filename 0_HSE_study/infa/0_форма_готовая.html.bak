@@ -1,0 +1,52 @@
+<form action="http://185.182.111.214:7628/cgi-bin/form_action.py" method='get' target='_self'> 	
+
+<ol>
+	<li>
+		<p>Название книги:
+			<select name = "book">
+				<option name="0_1.1.war_peace">Война и Мир</option>
+				<option name="0_1.2.karenina">Анна Каренина</option>
+				<option name="0_1.3.chuk_gek">Чук и Гек</option>
+			</select>
+		</p>
+	</li>
+	
+	<li>
+		<p>Координаты клиента:</p>
+		<p>Фамилия: <input name="surname" type = "text" value = "Петров">
+		Имя: <input name="name" type = "text" value = "Пётр">
+		Отчество: <input name="patronim" type = "text" value = "Петрович"></p>
+	</li>
+	
+	<li>
+		<p>Заказать: <input name="amount" type = "text" value = "5" style = "width: 50px"> шт по цене <input name="price" type = "text" value = "500"> руб</p>
+	</li>
+	
+	<li>
+		<p>Место проживания
+		<input type	= "radio" id = "Москва", name = "city", value = "Москва"><label	for="Москва">Москва</label>
+		<input type	= "radio" id = "Нижний", name = "city", value = "Нижний"><label	for="Нижний">Нижний</label>
+		<input type = "radio" id = "Бор", name = "city", value = "Бор" checked><label for="Бор">Бор</label></p>
+	</li>
+	
+	<li>
+		<p>Время получения заказа
+		<input type="checkbox" id="10-12" name="10-12" checked><label for="10-12">10-12</label>    
+		<input type="checkbox" id="12-14" name="12-14"><label for="12-14">12-14</label>	
+		<input type="checkbox" id="14-16" name="14-16"><label for="14-16">14-16</label></p>
+	</li>
+	
+	<li>
+		<p>Дополнительная информация:</p>
+		<p><textarea name="comment">Для дополнительной информации</textarea></p>
+	</li>
+	
+	<li>
+		Пароль: <input name="password" type="password", value = "1234">
+	</li>
+</ol>
+
+<input type="reset" value="Обновить">	
+<input type="submit" value="Отправить">
+
+</form>

@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)                       # load tidyverse library
+getwd()                                  # check the working directory
+region <- read.csv2("Data/regional_data.csv") # load the data
+region                        # check the data
+```
+```{r}
+model <- lm(reg_ur2011 ~ reg_alcbeer, data = region)
+summary(model)
+```
+```{r}
+model2 <- lm(reg_ur2011 ~ reg_alcbeer*democracy_index, data = region)
+summary(model2)
+```
+```{r}
+model4 <- lm(reg_ur2011 ~ democracy_index*reg_alcbeer, data = region)
+summary(model4)
+```
+
+```{r}
+require(margins)
+margins.model <- cplot(model2, dx = "democracy_index", x = "reg_alcbeer", what = "effect", draw=F)
+ggplot(data = margins.model, aes(x = xvals, y = yvals)) + 
+  geom_line(color = "red") + 
+  geom_ribbon(alpha = .2, aes(ymin = lower, ymax = upper)) + 
+  geom_hline(yintercept = 0, linetype = "dashed")  
+```
+
+```{r}
+model3 <- lm(reg_ur2011 ~ democracy_index + protest_events, data = region)
+plot(model3)
+```
+```{r}
+data <- c(8, 7, 7, 10, 13, 14, 15, 16, 18) 
+z_scores <- (data-mean(data))/sd(data)
+z_scores
+mean(z_scores)
+mean(data)
+plot(data)
+sd(data)
+median(data)
+plot(z_scores)
+```
+```{r}
+library(tidyverse)
+library(sjPlot)
+
+# Load the ESS dataset
+ess_data <- read.csv("Data/ess_data.csv")
+ess_data
+
+
+```
+```{r}
+# Build a logistic regression model
+model <- glm(clmt_binary ~ gndr + Age, data = ess_data, family = binomial)
+summary(model)
+# Show odds ratio estimates using sjPlot
+#tab_model(model, exponentiate = TRUE)
+```
+
+```{r}
+tab_model(model)
+```
+

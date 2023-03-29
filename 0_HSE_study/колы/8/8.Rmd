@@ -1,0 +1,201 @@
+---
+title: "Seminar 8"
+author: "Aleksei Sorbale"
+date: "2023-03-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Paired regression: Children & Parents Height**
+
+```{r}
+#install.packages("HistData")
+library(HistData)
+attach(Galton)
+```
+
+#### Change the scale
+
+Assign the height of children and the height of parents from Galton dataset to the `child_new` and `parent_new` objects
+
+Multiplication by 2.54 is made to bring the height values into compliance with the metric system. The original values are in inches: [1 inch = 2.54 centimeters]{.underline}
+
+```{r}
+child_new<-Galton$child*2.54 
+parent_new<-Galton$parent*2.54
+```
+
+**Paired regression**
+
+```{r}
+galton_regr<-lm(child_new~parent_new)
+summary(galton_regr)
+```
+
+**Visualization of the relationship** **with base R**
+
+```{r}
+plot(parent_new, child_new, main = "", ylab ="", xlab = "")
+title(main = "Dependence of the height of children on the height of parents", ylab="Children height", xlab="Parents height")
+abline(galton_regr, col = "blue")#regression line (trend)
+```
+
+## Paired regression: Satisfaction with governmental policy & Age
+
+**Option 1: with NAs**
+
+```{r}
+library(readr)
+data <- read_delim("~/0_HSE_study/колы/8/Data/data2012_mneniye.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+attach(data)
+```
+
+```{r}
+data_regr_1<-lm(Satisfaction~Age)
+summary(data_regr_1)
+```
+
+**Option 2: without NAs**
+
+```{r}
+data_new<-na.omit(data)
+attach(data_new)
+
+data_regr_2<-lm(Satisfaction~Age)
+summary(data_regr_2)
+```
+
+## Paired regression: Political stability & Government effectiveness
+
+```{r}
+World <- read_delim("~/0_HSE_study/колы/8/Data/World_data.csv", 
+    delim = ",", escape_double = FALSE, trim_ws = TRUE)
+attach(World)
+```
+
+```{r}
+regr_World<-lm(Political_Stability~Government_Effectiveness)
+summary(regr_World)
+```
+
+Calculate a new variable `Democracy Sustainability Index` and put it into the dataset. Democracy Sustainability Index is the product of the following formula: $$\dfrac{Political\_Rights + Civil\_Liberties}{1-Government\_Effectiveness^2}$$
+
+**Put this DSI variable into the original dataset**:
+
+```{r}
+World$Democracy_Index = (Political_Rights+Civil_Liberties)/1-Government_Effectiveness^2
+```
+
+**Remove the variables used for Democracy Sustainability Index calculation from the dataset**:
+
+*dplyr* option
+
+```{r}
+World = dplyr::select(World, -Political_Rights, -Civil_Liberties, -Government_Effectiveness)
+```
+
+*Base R* option
+
+```{r}
+World = World[,-c(4,8,9)]
+```
+
+## Paired regression: Democracy Stability Index & Rule of law
+
+```{r}
+attach(World)
+
+regr_World2<-lm(Democracy_Index~Rule_of_Law)
+summary(regr_World2)
+```
+
+**Visualization of the relationship** **with `ggplot2`**
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+ggplot(World) + 
+  aes(x=Democracy_Index, y=Rule_of_Law) +
+  geom_point() +
+  ylab("Rule of law index")+
+  xlab("Democracy index")+
+  ggtitle("Dependence of the Democracy Index from the Rule of Law")+
+  stat_smooth(method = "lm", col="red")+
+  theme_bw()
+
+```
+
+## Practice: 2018 presidential elections in Russia
+
+1.  Import the dataset `Presidential_elections_2018.csv`
+
+```{r}
+library(readr)
+Presidential_elections_2018 <- read_delim("~/0_HSE_study/колы/8/Data/Presidential_elections_2018.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Number_of_voters = col_number(), 
+        Absentee_Ballots = col_number(), 
+        Station_Ballots = col_number(), Home_Ballots = col_number(), 
+        Home_Box_Ballots = col_number(), 
+        Station_Box_Ballots = col_number(), 
+        Invalid_votes = col_number(), Valid_votes = col_number(), 
+        Baburin_votes = col_number(), Grudinin_votes = col_number(), 
+        Zhirinovskii_votes = col_number(), 
+        Putin_votes = col_number(), Sobchak_votes = col_number(), 
+        Suraikin_votes = col_number(), Titov_votes = col_number(), 
+        Yavlinskii_votes = col_number()), 
+    trim_ws = TRUE)
+head(Presidential_elections_2018)
+```
+
+2.  Calculate the `Turnout` variable. The formula for calculation is as follows:
+
+$$
+\dfrac{Station\_Ballots + Home\_Ballots}{Number\_of\_voters}
+$$
+```{r}
+Presidential_elections_2018$Turnout <- (Presidential_elections_2018$Station_Ballots + Presidential_elections_2018$Home_Ballots) / Presidential_elections_2018$Number_of_voters
+```
+
+3.  Add the `Turnout` variable to the dataset
+4.  Filter the dataset so that it contains only the following variables: `Region`, `Turnout` (the variable created at step 2), `Number_of_voters`, `Home_Ballots`, `Invalid_votes`, `Putin_percent`
+
+```{r}
+data_filtered <- subset(Presidential_elections_2018, select = c("Region", "Turnout", "Number_of_voters", "Home_Ballots", "Invalid_votes", "Putin_percent"))
+head(data_filtered)
+```
+
+5.  Build a correlation matrix (`cor()` function) for the variables included in the dataset (except for `Region`).
+
+**NB!** Before proceeding to the matrix building, unify the 5 variables of interest into a `data.frame`
+
+```{r}
+data_cor <- data_filtered[, 2:6]
+cor_matrix <- cor(data_cor)
+cor_matrix
+```
+
+
+6.  Conduct paired OLS-regression for the pair of variables, which correlation coefficient is the **SMALLEST BY MODULE** according to the correlation matrix
+
+```{r}
+regression <- lm(Turnout ~ Putin_percent, data = data_filtered)
+summary(regression)
+```
+
+7.  Build a paired OLS-regression plot for the variables you have chosen, give it a name and captions on the axes, draw a regression trend
+
+```{r}
+library(ggplot2)
+ggplot(data_filtered, aes(x = Putin_percent, y = Turnout)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Percentage of Votes for Putin") +
+  ylab("Turnout") +
+  ggtitle("Relationship between Turnout and Votes for Putin")
+
+```
+

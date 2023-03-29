@@ -1,0 +1,148 @@
+---
+title: "Practice 2"
+author: "Anna Shirokanova and Olesya Volchenko"
+date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Practice 2: Chi-Square Test of Independence {.tabset}
+
+## Problem 1 
+
+In the first problem you will be using the 6th round of ESS. The dataset is available in data folder at bit.do/das2023
+
+You sit down to explore a few variables and run a chi-square test.
+
+```{r ESS data}
+library(foreign)
+library(haven)
+ESS <- read_sav("~/0_teaching/DAS 2023/DAS 2023/data/ESS6e02_4.sav")
+ESS
+```
+
+Select those who were born in the United Kingdom (variable ESS$cntbrthc):
+
+```{r}
+# table(ESS$cntbrthc)
+library(dplyr)
+uk <- filter(ESS, ESS$cntbrthc == "GB")
+head(uk)
+```
+
+
+Let's describe relationships between the following pairs of variables: 
+
+- `polintr` and `sgnptit` 
+
+I expect to find out if there is a relationship between the level of political interest (polintr) and whether individuals support (sign petition for) any non-governmental organization (sgnptit).
+
+```{r}
+# create a contingency table
+pol_sgnptit <- table(uk$polintr, uk$sgnptit)
+pol_sgnptit
+
+# run chi-square test
+chisq.test(pol_sgnptit, correct=F)
+```
+
+```{r}
+library(ggplot2)
+library(gplots)
+
+pol_sgnptit_table <- as.table(pol_sgnptit)
+balloonplot(pol_sgnptit_table, show.margins = FALSE, xlab = "", ylab = "", main = "`polintr` and `sgnptit`")
+
+
+```
+
+- `vote` and `gndr`
+
+- `rlgblg` and `sgnptit`
+
+- `domicil` and `gndr`
+
+For every pair :
+
+**1) write down what you expect to find out (research hypothesis);**
+
+**2) run a statistical test**
+
+**3) build a plot visualizing the relationship**
+
+**4) describe the results and write your interpretation**
+
+
+
+
+## Problem 2
+
+You are trying for an internship at a retail company, and the interviewer asks you to evaluate whether the proportions of coloured M&M's in their latest supply are the same in blue and brown packages.
+
+You are given the numbers for the frequencies of colours by package colour. You look closer at the data, ready for a test:
+
+```{r mm-data}
+brown <- c(26, 6, 12, 9, 12, 15)
+blue <- c(14, 8, 11, 15, 15, 7)
+data <- cbind(brown, blue)
+colors <- c('red', 'blue', 'green', 'yellow', 'orange', 'brown')
+sum(brown)
+sum(blue)
+rownames(data) <- colors
+data
+```
+
+```{r another-test}
+chisq.test(data, correct=F)
+```
+
+Later, you get an update to your data supply with some info on yellow-package M&M's. You need to update your dataset and run the test again, now on three colour.
+
+![](2022-02-16.gif)
+
+```{r data-update}
+yellow <- c(9, 5, 6, 5, 1, 6)
+new <- cbind(brown, blue, yellow)
+colnames(new) <- c("brown", "blue", "yellow")
+rownames(new) <- colors
+new
+
+```
+
+```{r test-rerun}
+chisq.test(new, correct=F)
+
+```
+```{r}
+library(gmodels)
+CrossTable(new, expected=T)
+```
+
+
+## Problem 3
+Hotdogs vs. Hamburgers - which one would you prefer?
+
+https://www.axios.com/hamburgers-more-patriotic-july-4-food-than-hotdogs-66066e0c-ee3c-40de-8ec7-3dc7e5ac9164.html
+
+Reproduce the survey data and decide if there is any relationship between 
+electoral behavior and opinion on 'the most American food'
+
+```{r}
+vote <- rbind(round(c(960/100*31, 840/100*39,  389/100*33), 0), # Hamburgers
+              round(c(960/100*33, 840/100*29, 389/100*21), 0)) # Hotdogs
+rownames(vote) <- c("Hamburgers", "Hotdogs")
+colnames(vote) <- c("CLINTON VOTERS", "TRUMP VOTERS", "DIDN'T VOTE")
+vote
+```
+```{r}
+CrossTable(vote, expected=T)
+```
+
+
+
+Well done!

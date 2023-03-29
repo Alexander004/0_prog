@@ -1,0 +1,138 @@
+---
+title: "Untitled"
+author: "Diana Piskareva"
+date: "2023-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r warning = FALSE}
+library(haven)
+library(ggplot2)
+library(gplots)
+library(dplyr)
+library(vcd)
+library(kableExtra)
+
+```
+Thus, in order to perform the necessary manipulations with the data, we downloaded the date ESS 2020
+```{r warning = FALSE}
+ESS10 <- read_sav("~/0_teaching/2/ESS10.sav")
+ESS10
+```
+
+Part I. Chi-squared Test (2 points)
+1) The correct choice of variables. A plot with the two variables involved (0.5 points)
+2) The null hypothesis is spelled out, and you make conclusions as table(flowers)
+to how the results relate to it (0.5)
+3) You have checked all the assumptions of the chi-square test and they are matched. You have run and correctly interpreted the chi-square test, analysing the standardized residuals (1)
+
+#I want to consider two categorical variables for the chi-squared test: how people vote and how people are interested in politics (polintr), that is, my goal is to see if there is any relationship between them within Greece  
+```{r warning = FALSE}
+
+# table(ESS6$cntry)
+gr <- filter(ESS10, ESS10$cntry == "GR")
+head(gr)
+
+```
+
+```{r warning = FALSE}
+grS <- gr %>% 
+  select(polintr,vote)
+
+
+```
+```{r warning = FALSE}
+grS = grS%>%
+  mutate(polintr = case_when(polintr=="Very interested" ~ "4",polintr=="Quite interested" ~ "3",polintr=="Hardly interested" ~ "2", polintr=="Not at all interested" ~ "1"))
+
+```
+
+```{r setup, include=FALSE}
+#H0: the variables are independent, there is no relationship between vote and polintr. Knowing the value of one variable does not help to predict the value of the other variable
+
+#H1: the variables are dependent, there is a relationship between the vote and polintr. Knowing the value of one variable helps to predict the value of the other variable
+
+grS$polintr <- as.numeric(as.character(grS$polintr))
+
+```
+
+```{r setup, include=FALSE}
+
+counts <- table(grS$vote, grS$polintr)
+barplot(counts, main="distribution political interests and vote",
+  xlab="Political interests", col=c("pink","lightblue","lightgreen"),
+  legend = rownames(counts))
+barplot()
+```
+
+```{r setup, include=FALSE}
+
+ggplot(grS, aes(x = factor(vote), fill = factor(polintr))) +
+  geom_bar(position = "stack") +
+  labs(x = "Vote", y = "", title = "Joint Distribution of political interest and vote", fill = "Political interests")
+ggplot()
+```
+
+
+```{r setup, include=FALSE}
+
+
+mosaic(~ vote + polintr ,
+  direction = c("v", "h"),
+  data = grS,
+  shade = TRUE
+)
+mosaic()
+
+```
+
+
+Part II. The t-test (2.5 points)
+4) The correct choice of variables, a plot with these variables (0.5)
+5) You have checked the normality assumption for the t-test in 2 different ways (QQ plots / histogram / skew and kurtosis) (0.5)
+6) The null hypothesis is spelled out, and you make conclusions as to how the results relate to it. You have applied the correct t-test formula and interpreted the result correctly. If the result is statistically significant, the effect size is reported (1)
+7) You have double-checked your results with a non-parametric test (0.5)
+
+
+```{r setup, include=FALSE}
+grN <- gr %>% 
+  select(nwspol, vote) %>% 
+    filter(vote != 3) %>% 
+  filter(vote != 7) %>% 
+  filter(vote != 8) %>% 
+  filter(vote != 9) %>% 
+  filter(nwspol !=7777) %>% 
+    filter(nwspol !=8888) %>% 
+    filter(nwspol !=9999)  
+```
+
+
+```{r setup, include=FALSE}
+ggqqplot(grN, x = "weight")
+
+
+
+
+```
+
+
+
+```{r setup, include=FALSE}
+
+
+```
+
+```{r setup, include=FALSE}
+```
+
+```{r setup, include=FALSE}
+```
+
+```{r setup, include=FALSE}
+```
+

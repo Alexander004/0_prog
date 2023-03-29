@@ -1,0 +1,158 @@
+---
+title: "DAiS Entrance test"
+author: "Dmitry Arkatov, Olesya Volchenko"
+output: html_document
+date: '2023-01-11'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = FALSE, message = FALSE, warning = FALSE)
+```
+
+For tasks 1-9 we'll be using a data set on penguins from Palmer Station. You can either load it using the package palmerpenguins, or by accessing a github directory of the package.
+Load the dataset any way you're familiar with. 
+
+# Task 1
+How many variables there are in the dataset? How many of them contain numeric values? (Report the values in the google form)
+
+```{r}
+
+```
+
+
+# Task 2
+Calculate the mean value of flipper length. (Report the value in the google form)
+
+```{r}
+
+```
+# Task 3
+What are the minimal and maxumal values of flipper length in the dataset? Report both values in the google form.
+```{r}
+
+```
+
+
+# Task 4
+Calculate the mean value of flipper length for the Adele penguins only. Report the value in the google form.
+```{r}
+
+```
+
+# Task 5
+In the dataset flipper length variable is measured in milimeters. Create a new variable named flipper_length_cm that will show flipper length in centimetes. Paste the code into the google form.
+
+```{r}
+
+```
+
+
+# Task 6
+What is the percentage of penguins from Biscoe island in the dataset?
+
+```{r}
+
+```
+
+
+# Task 7
+Now, let's make a histogram visualising bill length distribition. 
+Paste the code creating the graph into the google form.
+
+Additional task (7.1):
+Adjust the plot according to the following requirements.
+a) theme must be minimalist
+b) x-axis naming must reflect the variable visualized, y-axis naming must be blank
+c) the requirements for title is as follows: size must be 20, face written in bold, heigh adjusted by 0.5
+d) the subtitle must indicate the number of bins
+e) the legend must have "type of penguin" title
+
+```{r}
+
+```
+Report the code for the updated plot in the google form as well.
+
+# Task 8
+Let's proceed with visualization. This time your task to visualize the relationship between bill length and depth. Describe in your own words what do you see on the plot? Is there a relationship between those two variables?
+
+Paste your code into the google form, report your brief interpretation as well.
+
+Additional task (8.1):
+Adjust the plot according to the following requirements.
+
+a) Observations on the graph must be colored according to the species type. 
+b) The theme must be with white background and black gridlines.
+c) You must set up a scale for each variable (in millimeters), including limits or breaks (of your liking)
+d) Each axis must be have a proper name, according to a variable it indicates.
+e) You should set up a title for your graph as well as an inscription (a caption) of where does the data come from. You need to change the face to bold, size to 20 and adjust the height as you prefer. The subtitle must be in italic face, size is 10, and height-adjusted as you like.
+
+Report the code for the updated plot in the google form as well.
+```{r}
+
+```
+
+
+
+For the tasks 9-11 you need to download the dataset indicating the performance of the Russian Universities in 2013 - 2017. https://www.data-in.ru/data-catalog/datasets/169/ Load the dataset.
+
+# Task 9
+Fix the variables types as well as encoding issues. Keep only the following variables: federal_district, region_code, okato, name_short, year, ege_budg, scopus, pk, total_income, e6
+
+```{r}
+
+```
+Paste the code from this task to the google form.
+
+# Task 10
+
+For the variable 'ege_budg' find top 10 universities with the highest mean value over the all years.
+```{r}
+
+```
+
+# Task 11
+
+For these top ten universities, build a graph showing the change of ege_budg over time. Justify your choice of a graph and interpret the results in a short paragraph. 
+
+```{r}
+
+```
+
+
+For tasks 12-14 you're going to manipulate and work with the dataset on crop yields. The dataset can be accessed by the following link https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv
+
+#Task 12
+Explain what the following code does to the original dataframe.
+```{r}
+key_crop_yields <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv') %>% 
+  pivot_longer(cols = 4:14,names_to="crop",values_to="yield") %>% 
+  mutate(yield=as.numeric(yield)) %>% 
+  drop_na(yield) %>% 
+  mutate(crop=case_when(
+    crop=="Wheat (tonnes per hectare)"~"Wheat",
+    crop=="Rice (tonnes per hectare)"~"Rice",
+    crop=="Maize (tonnes per hectare)"~"Maize",    
+    crop=="Soybeans (tonnes per hectare)"~"Soybeans",
+    crop=="Potatoes (tonnes per hectare)" ~"Potatoes",
+    crop=="Beans (tonnes per hectare)"~"Beans",
+    crop=="Peas (tonnes per hectare)"~"Peas",
+    crop=="Barley (tonnes per hectare)"~"Barley"
+  ))
+
+russia_crops<-key_crop_yields %>% 
+  filter(Entity=="Russia")
+```
+
+#Task 13
+
+Visualize the trend of wheat harvesting from 1992 to 2018. The graph must be titled accordingly and all the variables axes must have proper naming. Add any graph theme of your liking. The title must be of size 15, and height-adjusted by 0.5. The year axis must have breaks every two years. 
+```{r}
+
+```
+
+#Task 14
+Now, visualize the trends for the harvest rates for all the crops separately. Use the dark pallet from brewer color pack to color the graphs. You can pick any background theme. The legends must be removed.
+
+```{r}
+
+```

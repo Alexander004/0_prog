@@ -1,0 +1,124 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-02-15"
+---
+```{r}
+library(plotly)
+library(ggplot2)
+library(stringr)
+library(dplyr)
+library(readr)
+data2012_mneniye <- read_delim("~/0_HSE_study/колы/4/Data/data2012_mneniye.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Gender = col_number(), 
+        Age = col_number(), Satisfaction = col_number(), 
+        Participation = col_number(), Vote = col_number(), 
+        Duma = col_number(), Violation = col_number(), 
+        Observers = col_number(), Obs_elections = col_number(), 
+        Trust_Putin = col_number(), Protest = col_number(), 
+        Education = col_number(), FO = col_number(), 
+        Region = col_number(), wes_total_reg = col_number()), 
+    trim_ws = TRUE)
+data2012_mneniye
+```
+###CLEANING
+Clean the dataset:
+a. Leave only the variables Gender, Age, Satisfaction, Vote and Education
+b. Leave only the respondens, which age is between 18 and 65, including 18 and 65
+c. Leave only the respondents with School, Not finished higher and Higher education (Education == 2:4)
+d. Get rid of the NAs in the dataset
+
+```{r}
+data2012_mneniye_1 <- data2012_mneniye[, c("Gender", "Age", "Satisfaction", "Vote", "Education")]
+data2012_mneniye_2 <- data2012_mneniye_1[data2012_mneniye_1$Age >= 18 & data2012_mneniye_1$Age <= 65,] 
+data2012_mneniye_3 <- data2012_mneniye_2[data2012_mneniye_2$Education == 2:4,]
+data2012_mneniye_clean <- na.omit(data2012_mneniye_3)
+data2012_mneniye_clean
+attach(data2012_mneniye_clean)
+```
+3. Present the descriptive statistics for all the variables left in the final dataset using table1
+```{r}
+library(table1)
+mneniye_table<-table1(~ Gender + Age + Satisfaction + Vote + Education, data=data2012_mneniye_clean)
+mneniye_table
+```
+4. Build an interactive scatterplot showing the relationship between age (Age) and level of satisfaction with the governmental policies (Satisfaction)
+The plot should contain the title, the captions on x and y axes, and the categorization on gender (Gender). Categorization implies that the observations (dots) of the scatterplot when clicking on them should give information about the respondent (male/female) + the plot must have a legend indicating which color of the dot is indicating which gender. 
+
+Info to set the conditions for categorisation: Gender == 1 is Male, Gender == 2 is Female
+
+Dots on the scatterplot reserved for two genders should have different colors (any). 
+
+```{r}
+data2012_mneniye_clean = data2012_mneniye_clean %>% mutate(
+gender_names = case_when(
+  Gender == 1 ~ "Male",
+  Gender == 2 ~ "Female"
+))
+
+age_sat <- plot_ly(data = data2012_mneniye_clean, x = ~Age, y= ~Satisfaction, color = ~gender_names, colors = c("#E04553","#2921DB"),  type = "scatter") %>% 
+  layout(title = "Age/Satisfaction Relationship", xaxis = list(title = 'Age'), yaxis = list(title = 'Satisfaction'),
+  legend = list(title=list(text='Gender')))
+age_sat
+```
+5. Build three interactive boxplots on one plot. The major effect to visualize is Satisfaction. The variable to set categories is Education. 
+So, there should be three boxplots showing the distribution of satisfaction parameter for respondents with (1) School, (2) Not finished higher and (3) Higher education. 
+
+Note:
+a. Those should be three boxplots built near each other on one plot
+b. Those boxplots should be built originally in plotly, not 'alive' versions of ggplot2 visualizations (that is, not built with ggplotly() applied to ggplot2 plot)
+c. Info to set the conditions for categorisation: Education == 2 is School education, Education == 3 is Not finished higher eduction, Education == 4 is Higher eduction
+
+The general plot should have a title and names for all the boxplots (School, Not finished higher education and Higher education), the boxplots should have different colors (any). 
+
+```{r}
+data2012_mneniye_clean = data2012_mneniye_clean %>% mutate(
+  education_name = (case_when(
+    Education == 4 ~ "Higher education",
+    Education == 3 ~ "Not finished higher ed.",
+    Education == 2 ~ "School education"
+  )))
+
+ed_sat <- plot_ly(data=data2012_mneniye_clean, x = ~education_name, y = ~Satisfaction, type = "box", color = ~education_name, colors = c("#00942F","#2921DB","#E04553")) %>%
+  layout(title = "Education/Satisfaction Relationship", xaxis = list(title = " "), yaxis = list(title = "Satisfaction"))
+
+ed_sat
+```
+6. Build an interactive pie chart for the variable Satisfaction 
+
+a. Info for Satisfaction: Satisfaction == 1 is Complete dissatisfaction, Satisfaction == 2 is Mostly dissatisfaction, Satisfaction == 3 is Medium satisfaction, Satisfaction == 4 is Mostly satisfaction, and Satisfaction == 5 is Complete satisfaction
+
+b. Count the number of observations for each of the categories listed above 
+```{r}
+sat_data <- data2012_mneniye_clean %>% group_by(Satisfaction) %>% count()
+sat_data
+```
+
+c. Set different colors (any) and labels (any) for each of the satisfaction categories represented on the pie chart
+
+d. Set the condition for the number of observations in each of pieces of the pie to be represented in percentages (e.g. piece of the final plot should have the caption of 19% for Medium satisfaction) . When clicking on the piece of the pie, one should get the absolute number of respondents in the respective category (e.g. '104 respondents'). There should be no legend for the pie chart. 
+
+```{r}
+sat_data = sat_data %>% mutate(
+  sat_name = (case_when(
+    Satisfaction == 1 ~ "Complete dissatisfaction",
+    Satisfaction == 2 ~ "Mostly dissatisfaction",
+    Satisfaction == 3 ~ "Medium satisfaction",
+    Satisfaction == 4 ~ "Mostly satisfaction",
+    Satisfaction == 5 ~ "Complete satisfaction"
+  )))
+
+colors <- c('#94110F', '#E0312D', '#CADECE', '#2DE065', '#00942F')
+
+fig <- plot_ly(sat_data, labels = ~sat_name, values = ~n, type = 'pie',
+        textposition = 'inside',
+        textinfo = 'label+percent',
+        insidetextfont = list(color = '#FFFFFF'),
+        hoverinfo = 'text',
+        text = ~paste(values, 'respondents'),
+        marker = list(colors = colors, line = list(color = '#FFFFFF', width = 1)),
+        showlegend = FALSE)
+
+fig
+```
+

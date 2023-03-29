@@ -1,0 +1,229 @@
+---
+title: "Seminar 5"
+author: "Aleksei Sorbale"
+date: "2023-02-16"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1
+
+### **Binominal test**
+
+```{r}
+binom.test(18, 20, p=0.5, alternative="two.sided")#example with a coin
+binom.test(300, 1000, p=0.65, alternative="two.sided")#example with prime-minister
+```
+
+## Task 2
+
+### **Student's t-test for independent samples**
+
+**Data**: students' grades for QM test: groups 1, 2, 3 and 4
+
+```{r}
+group1<-c(5,6,8,5,4,10,8,4,4,8,7,5,6,8,5,6,4,8,7,6,6,9,9,6,10,1)
+group2<-c(5,10,9,5,7,8,10,2,5,6,7,6,9,6,6,6,9,4,9,9,4,7,5,5,10)
+group3<-c(6,5,3,10,4,9,6,2,10,5,8,4,5,8,6,2,7,4,9,4,7,9,7,4,9,8,10)
+group4 <-c(7,3,5,7,5,1,2,5,3,7,3,5,6,4,7,2,6,3,8,2,5,8,7,9,7,7,4)
+```
+
+**Visualize data**: four boxplots
+
+```{r}
+
+library(ggplot2)
+library(ggthemes)
+ggplot() + geom_boxplot(aes(x='Group 1', y=group1), fill="hotpink2") + 
+labs (title = "Distribution of second-year student grades for QM test", x="Group", y="Students' grades for the test (by groups)") +
+  geom_boxplot(aes(x='Group 2', y=group2), fill="green4")  + 
+  geom_boxplot(aes(x='Group 3', y=group3), fill="lightseagreen") + 
+  geom_boxplot(aes(x='Group 4', y=group4), fill="sandybrown") + 
+  theme_bw()
+
+```
+
+Randomly [filter 25 students out of 27]{.underline} in **group 3**, so that the size of this sample matches the sample size for **group 2**
+
+```{r}
+group3_grade25<-sample(group3,25)
+group3_grade25
+```
+
+| Check for the **normality of distribution** in two groups via `shapiro.test()` 
+
+```{r}
+shapiro.test(group2) # p-value = 0.1177, therefore, we cannot reject H0 that the distribution is different from normal 
+
+#orientation on the threshold p<0.05
+
+shapiro.test(group3_grade25) # p-value = 0.1072 (random)
+```
+
+| Check for **homogeneity of variances** in two samples via `var.test()`
+
+```{r}
+var.test(group2,group3_grade25) # p-value = 0.5571 (random)
+```
+
+| **Student's t-test (comparison of samples)**
+
+```{r}
+t.test(group2,group3_grade25, paired=F, var.equal=T, alternative = "two.sided")
+```
+
+## Task 3
+
+### **Student's t-test for dependent (paired) samples**
+
+**Data**: Russian governors' efficiency by 83 regions in 2019 and 2021
+
+```{r}
+
+Governor_efficiency_2021<-c(
+  3.340058, 3.487352, 3.262390, 2.703485, 2.769829, 2.602641, 2.799938, 2.641882, 1.860896, 3.259277,
+  3.197240, 3.111650, 2.931420, 3.395107, 1.228543, 3.419730, 1.340341, 3.711110, 3.579312, 2.522482,
+  1.924205, 3.239865, 1.605958, 2.497909, 3.263193, 2.028917, 3.449813, 2.998685, 3.051794, 2.410641,
+  3.060089, 1.188560, 2.360630, 1.587523, 2.380161, 1.709104, 2.494457, 2.977297, 1.504619, 1.970722,
+  3.399876, 2.342005, 1.202196, 2.558001, 1.914378, 1.936592, 1.128370, 2.133732, 1.039167, 1.574649,
+  1.304509, 1.890191, 1.250982, 1.474859, 3.811923, 2.770824, 2.826713, 2.248259, 2.804652, 3.539646,
+  1.719193, 2.156506, 3.043441, 2.505993, 2.756654, 2.533240, 3.623129, 1.929698, 2.128946, 2.324179,
+  2.064881, 1.745690, 2.860402, 3.607704, 3.513323, 3.113642, 3.653694, 3.089872, 3.540408, 2.461700,
+  2.943309, 2.822206, 3.283496)
+
+Governor_efficiency_2019<-c(
+  3.178758034,2.718889302,3.786684004,1.82242603,2.237343566,2.294624116,3.207722083,3.370272614,
+  3.585614471,2.293477289,2.570990734,3.501947555,2.398346861,3.015258612,3.431085176,1.222264147,
+  3.327915559,3.004240427,2.65103376,1.113199345,1.687450029,3.424555897,3.814163674,1.99195193,
+  3.282089193,2.659332236,2.587317582,3.645180294,2.96625683,2.950277784,3.670288849,3.757557161,
+  3.351080756,2.618243669,3.416189807,3.543019897,3.009717046,3.383367854,3.007089157,1.979944353,
+  3.3416511,3.573919555,3.306050884,2.298692173,1.795006713,2.125961513,1.482448006,2.345780759,
+  1.092520788,1.096619199,1.600942684,3.767911924,1.896522303,2.192980318,1.091004158,2.342911051,
+  1.525804835,1.314881044,1.178053589,2.99610948,3.022403385,3.059402812,1.660548902,2.861867029,
+  3.693029121,3.300848213,2.36120007,1.591261913,3.138720811,3.25995686,1.803533333,1.763346543,
+  2.663423421,2.71562968,3.178486711,2.921795952,2.306784069,1.004542087,2.730690335,2.679940677,
+  1.472318199,1.45916493,4.115141029)
+```
+
+**Visualize the data**: boxplots
+
+```{r}
+ggplot() + geom_boxplot(aes(x='Efficiency 2019', y=Governor_efficiency_2019), fill="tomato1") + 
+  labs (title = "Efficiency index of Russian governors in 2019 and 2021", x="Aggregated efficiency rating", y="") +
+  geom_boxplot(aes(x='Efficiency 2021', y=Governor_efficiency_2021), fill="purple4") + 
+  theme_bw()
+
+```
+
+| Check for **parametricity prerequisites** for Student's t-test
+
+```{r}
+shapiro.test(Governor_efficiency_2019)
+shapiro.test(Governor_efficiency_2021)
+
+var.test(Governor_efficiency_2019,Governor_efficiency_2021)
+
+```
+
+| **Student's t-test (comparison of samples)**
+
+```{r}
+t.test(Governor_efficiency_2019,Governor_efficiency_2021, paired=T, var.equal=T, alternative="two.sided")
+
+```
+
+## Task 4. 
+
+### Mann-Whitney test
+
+**Data**: level of democracy (Freedom House) in 28 countries of Europe and Asia
+
+```{r}
+Europe<-c(1.0,2.0,1.5,2.5,1.0,1.0,1.5,2.0,2.5,3.0,1.5,1.0,4.0,1.5)
+Asia<-c(2.0,3.0,4.5,4.5,4.0,3.0,2.5,3.0,1.5,1.0,4.5,5.0,2.0,3.5)
+```
+
+| Check for the **normality of distribution**
+
+```{r}
+shapiro.test(Europe) 
+
+shapiro.test(Asia) 
+
+```
+
+| Check for **homogeneity of variances**
+
+```{r}
+
+var.test(Europe, Asia) 
+
+```
+
+Not all prerequisites for the t-test are fulfilled, so we perform the **Mann-Whitney test**
+
+Mann-Whithey test for directional and non-directional hypotheses
+
+[**!!! NOTE**: directional and non-directional hypotheses can be checked by both t-test and Mann-Whitney test]{.smallcaps}
+
+| **Mann-Whitney test** **(comparison of samples)**
+
+```{r}
+wilcox.test(Europe,Asia,alternative = "two.sided")
+wilcox.test(Europe,Asia,alternative = "less")
+wilcox.test(Europe,Asia,alternative = "greater")
+```
+
+## Practice. Elections-2018
+
+1.  Consider two samples: (1) percentage of votes for Putin in the Central Federal District and (2) percentage of votes for Putin in the Volga Federal District
+
+```{r}
+CFD<-c(0.79712, 0.81603, 0.73654, 0.78885, 0.71376, 0.7616, 0.6871, 0.8101, 0.8084, 0.7449, 0.7677, 0.7634, 0.7349, 0.8181, 0.7455, 0.7920, 0.7184, 0.7088)
+VFD<-c(0.7769, 0.7399, 0.8535, 0.8209, 0.7623, 0.7729, 0.7535, 0.7041, 0.7726, 0.7297, 0.7998, 0.7582, 0.7833, 0.7427)
+```
+```{r}
+ggplot() + geom_boxplot(aes(x='CFD', y=CFD), fill="tomato1") + 
+  labs (title = "", x="", y="") +
+  geom_boxplot(aes(x='VFD', y=VFD), fill="purple4") + 
+  theme_bw()
+```
+
+2.  Make samples equal in size using the `sample()` function. Note: the CFD sample is bigger, so the operation should be implemented for this one
+```{r}
+CFD_sample <- sample(CFD, size = length(VFD))
+CFD_sample
+```
+
+3.  Check the samples: for the normality of distribution for the homogeneity of variance
+```{r}
+# Normality test
+shapiro.test(CFD_sample)
+shapiro.test(VFD)
+
+# Variance homogeneity test
+var.test(CFD_sample, VFD) 
+
+```
+
+4.  If the samples meet the parametricity criteria, perform the two-tailed t-test If the samples do not meet the parametricity criteria, perform the two-tailed Mann-Whitney test
+```{r}
+# Parametric two-sample t-test
+t.test(CFD_sample, VFD, var.equal = TRUE)
+
+```
+
+5.  Perform additional tests to for the directional hypotheses:
+
+```{r}
+# One-sided t-test for the hypothesis that Putin's performance in VFD is better than in CFD
+t.test(CFD_sample, VFD, alternative = "less", var.equal = TRUE)
+
+# One-sided t-test for the hypothesis that Putin's performance in VFD is worse than in CFD
+t.test(CFD_sample, VFD, alternative = "greater", var.equal = TRUE)
+```
+a.  Putin's overall performance in the Volga Federal District is better than in the Central Federal District (the average percentage is higher)
+b.  Putin's overall performance in the Volga Federal District is worse than in the Central Federal District (the average percentage is lower)

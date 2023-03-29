@@ -1,0 +1,91 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+dataset_elections_2018 <- read_excel("~/0_HSE_study/нис/project/Data/local-elections-summary-2018.xls")
+dataset_elections_2018
+```
+```{r}
+library(dplyr)
+dataset_elections_2018_1 <- dataset_elections_2018 %>% select(-2, -10, -16, -17, -18, -19) 
+dataset_elections_2018_2 <- head(dataset_elections_2018_1, 32)
+dataset_elections_2018_2
+```
+
+Created a dataset for independent variables. 
+
+```{r}
+library(readr)
+```
+```{r}
+energy_efficiency <- read_csv("~/0_HSE_study/нис/project/Data/data-Trlc4.csv")
+energy_efficiency
+```
+```{r}
+London_data <- merge(dataset_elections_2018_2, energy_efficiency, by = "Borough")
+London_data
+```
+```{r}
+model <- lm(`Average energy efficiency rating` ~ CON_percent + LAB_percent + LD_percent + GRE_percent + Turnout, data = London_data)
+summary(model)
+```
+```{r}
+library(corrplot)
+london_check <- London_data %>% select(`Average energy efficiency rating`, CON_percent, LAB_percent, LD_percent, GRE_percent, Turnout)
+
+mat <- cor(london_check, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
+```
+```{r}
+model_2 <- lm(`Average energy efficiency rating` ~ CON_percent + LAB_percent, data = London_data)
+summary(model_2)
+```
+
+```{r}
+london_check_2 <- London_data %>% select(`Average energy efficiency rating`, CON_percent, LAB_percent)
+
+mat <- cor(london_check_2, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
+```
+
+
+
+```{r}
+library(ggplot2)
+ggplot(London_data, aes (x=LAB_percent, y=`Average energy efficiency rating`)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm", color = "red") 
+```
+```{r}
+labor_model <- lm(`Average energy efficiency rating` ~ LAB_percent, data = London_data)
+summary(labor_model)
+```
+
+```{r}
+plot(labor_model)
+```
+
+
+```{r}
+ggplot(London_data, aes (x=CON_percent, y=`Average energy efficiency rating`)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+
+
+```{r}
+con_model <- lm(`Average energy efficiency rating` ~ CON_percent, data = London_data)
+summary(con_model)
+```
+```{r}
+plot(con_model)
+```
+

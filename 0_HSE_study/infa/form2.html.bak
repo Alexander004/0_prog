@@ -1,0 +1,52 @@
+<form action="http://185.182.111.214:7628/cgi-bin/form_action.py" method='get' target='_self'> 	
+
+<ol>
+	<li>
+		<p>Название книги:
+			<select>
+				<option>Война и Мир</option>
+				<option>Анна Каренина</option>
+				<option>Чук и Гек</option>
+			</select>
+		</p>
+	</li>
+	
+	<li>
+		<p>Координаты клиента:</p>
+		<p>Фамилия: <input type = "text" value = "Петров">
+		Имя: <input type = "text" value = "Пётр">
+		Отчество: <input type = "text" value = "Петрович"></p>
+	</li>
+	
+	<li>
+		<p>Заказать: <input type = "text" value = "5" style m "width: 50px"> шт по цене <input type = "text" value = "500"> руб</p>
+	</li>
+	
+	<li>
+		<p>Место проживания
+		<input type	= "radio" id = "Москва", name = "city", value = "Москва"><label	for="Москва">Москва</label>
+		<input type	= "radio" id = "Нижний", name = "city", value = "Нижний"><label	for="Нижний">Нижний</label>
+		<input type = "radio" id = "Бор", name = "city", value = "Бор" checked><label for="Бор">Бор</label></p>
+	</li>
+	
+	<li>
+		<p>Время получения заказа</p>
+		<input type="checkbox" id="morning" name="morning" checked><label for="morning">10-12</label>    
+		<input type="checkbox" id="day" name="day"><label for="day">12-14</label>	
+		<input type="checkbox" id="day" name="day"><label for="day">14-16</label>	
+	</li>
+	
+	<li>
+		<p>Дополнительная информация:</p>
+		<p><textarea name="comment">Для дополнительной информации</textarea></p>
+	</li>
+	
+	<li>
+		Пароль: <input type="password", value = "1234">
+	</li>
+</ol>
+
+<input type="reset" value="Обновить">	
+<input type="submit" value="Отправить">
+
+</form>

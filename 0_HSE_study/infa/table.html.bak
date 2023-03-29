@@ -1,0 +1,12 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8">
+ </head>
+ <body>
+  <table border="1" width="400">
+   <tr class="bord" height="90" align="center"><th  colspan="2" width="66%">4_1</th><td align="right" background = "#c0c0c0"><font color="red">Высота</font> этой<br> ячейки - 90<br> пикселей</td></tr>
+   <tr class="bord" height="60" align="center" bgcolor = "#c0c0c0"><td  colspan="3" width="100%">7_1. Высота ячейки - 60 пикс</td></tr>
+  </table>
+ </body>
+</html>

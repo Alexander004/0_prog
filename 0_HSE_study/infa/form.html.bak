@@ -1,0 +1,14 @@
+<form action="http://185.182.111.214:7628/cgi-bin/form_action.py" method='get' target='_self'> 	
+
+<p>3. Заказать: <input size = "1" type=”text”> шт. по цене <input size = "5" type=”text”> руб</p>	
+<p>5. Время получения заказа: 	
+	<input type="checkbox" id="morning" name="morning" checked>    
+	<label for="morning">10-12</label>    
+	<input type="checkbox" id="day" name="day">    
+	<label for="day">12-14</label>	
+	<input type="checkbox" id="day" name="day">    
+	<label for="day">14-16</label>	
+</p>	
+	<input type="reset" value="Обновить">	
+	<input type="submit" value="Отправить">
+</form>

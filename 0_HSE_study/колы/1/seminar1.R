@@ -1,0 +1,93 @@
+---
+title: "Seminar 1"
+author: "Aleksei Sorbale"
+date: "2023-01-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**In this section you can leave comments/description to your operations if necessary**
+
+Another option is to use the sign \# to leave comments
+
+```{r}
+### R as calculator. Mathematical symbols: +, -, *, /, ^
+
+1+1
+2-1
+4/2
+4^2
+```
+
+```{r}
+### R as calculator. Mathematical functions: sqrt(), sum(), log(), log10(), log2(), log(x, base = y)
+
+sqrt(121)
+sum(12,13,14,15)
+log(10)
+log10(100)
+log(1, base=10)
+```
+
+**Help call commands** if you forget something: *help( )*, *?*
+
+**Assignment operators**: \<-, =
+
+Methods for **manual data entry** in R: function *c( )*
+
+# Task 1
+
+Calculate ENP for the 2011 Duma elections using the formula by G.V.Golosov (2011)
+
+```{r}
+# First option
+index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
+sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+
+# Second option
+sum_index_2011<-0
+for(i in index_2011)#for...in expression loop
+	{sum_index_2011<-(i/(i+max(index_2011)^2-i^2))+sum_index_2011
+}
+sum_index_2011
+```
+
+```{r}
+getwd()# get the current working directory
+setwd()# set the new working directory
+```
+
+# Task 2
+
+[Creating and presenting tables]{.underline}: functions *data.frame( )*, *colnames( )*, *rownames( )*
+
+```{r}
+data_1<-c(1:5)
+data_2<-c(6:10)
+table_1<-data.frame(data_1,data_2)
+colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns 
+rownames(table_1)<-c("Digit 1", "Digit 2", "Digit 3", "Digit 4", "Digit 5")#give names to table rows
+table_1
+```
+
+# Practice
+
+Create a [table with Russian cities]{.underline}
+
+|                |        |                |       |           |             |             |
+|-----------|:---------:|:-----------:|:---------:|:---------:|:----------:|:----------:|
+| **City**       | Moscow | St. Petersburg | Kazan | Volgograd | N. Novgorod | Vladivostok |
+| **District**   |  CFD   |      NWFD      |  VFD  |    SFD    |     VFD     |    FEFD     |
+| **Population** | 12500  |      5600      | 1243  |   1013    |    1257     |     605     |
+
+```{r}
+### Saving scripts and opening saved scripts
+savehistory("Seminar_1")
+q("no")
+
+### Remove all objects from the current workspace
+rm(list = ls())
+```

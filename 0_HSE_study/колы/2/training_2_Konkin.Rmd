@@ -1,0 +1,51 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-01-29"
+---
+
+```{r}
+df<-read.csv("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/2/Data/MPDataset_MPDS2019b.csv")
+df
+```
+```{r}
+summary(df)
+```
+
+
+
+```{r}
+df_short<-df[c('countryname','edate','partyname', 'absseat')]
+df_short
+```
+```{r}
+df_short_rus<-df_short[df_short$countryname == 'Russia',]
+df_short_rus
+```
+```{r}
+df_short_rus_bp<-df_short_rus[df_short_rus$absseat >39,]
+df_short_rus_bp_clean<-na.omit(df_short_rus_bp)
+df_short_rus_bp_clean
+```
+```{r}
+summary(df_short_rus_bp_clean)
+
+library(table1)
+Rus_table<-table1(~ countryname + edate + partyname + absseat, data=df_short_rus_bp_clean)
+Rus_table
+```
+```{r}
+df_short_rus_bp_clean_com<-df_short_rus_bp_clean[df_short_rus_bp_clean$partyname == 'Communist Party ot the Russian Federation',]
+df_short_rus_bp_clean_com
+```
+
+
+```{r}
+hist(df_short_rus_bp_clean_com$absseat, main = "CPRF electoral results", 
+     xlab = "Number of Seats", ylab = "Number of Electoral Cycles", col = "#B82828")
+```
+Frankly speaking, histograms give little to no information for "abbseats" variable. Seats should be the "y" axis and years of elections for example "x". Therefore, scatterplot is better to use in this situation in my opinion.
+```{r}
+plot(c(1:6), df_short_rus_bp_clean_com$absseat, main="CPRF electoral results",
+   xlab="Election Cycle", ylab="Number of Seats", type = "o", col="#B82828")
+```

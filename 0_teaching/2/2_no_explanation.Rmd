@@ -1,0 +1,196 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven)
+ESS10 <- read_sav("~/0_teaching/2/ESS10.sav")
+```
+
+Step 0 - clear the dataset, leave only important things
+
+```{r}
+library(dplyr)
+
+greece <- filter(ESS10, ESS10$cntry == "GR")
+```
+
+Let's describe relationships between the following pairs of variables: 
+
+- `polintr` and `vote` 
+
+I expect to find out if there is a relationship between the level of political interest (polintr) and whether individuals voted during last national elections (vote).
+
+```{r}
+greece_2 <- greece %>% select(polintr, vote)
+greece_2 <- na.omit(greece_2)
+greece_2
+```
+```{r}
+greece_2$polintr <- as.numeric(greece_2$polintr)
+greece_2$vote <- as.numeric(greece_2$vote)
+greece_2
+```
+
+Part I. Chi-squared Test (2 points)
+1) The correct choice of variables. A plot with the two variables involved (0.5 points)
+
+```{r}
+library(ggplot2)
+
+# Convert the variables to factors
+greece_2$polintr <- factor(greece_2$polintr)
+greece_2$vote <- factor(greece_2$vote)
+
+# Create a table with the counts for each combination of polintr and vote
+table_data <- table(greece_2$polintr, greece_2$vote)
+
+# Convert the table to a data frame
+table_df <- as.data.frame.matrix(table_data)
+
+# Add row names as a variable
+table_df$polintr <- rownames(table_df)
+
+# Reshape the data from wide to long format
+table_long <- reshape2::melt(table_df, id.vars = "polintr")
+
+# Create the stacked bar chart
+ggplot(table_long, aes(x = polintr, y = value, fill = variable)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Political Interest", y = "Count", fill = "Vote")
+
+```
+2) The null hypothesis is spelled out, and you make conclusions as table(flowers)
+to how the results relate to it (0.5)
+
+`Vote` Categories
+1	Yes
+2	No
+3	Not eligible to vote
+
+`polintr`	Category
+1	Very interested
+2	Quite interested
+3	Hardly interested
+4	Not at all interested
+
+
+Null hypothesis (H0): ________________________________________
+Alternative hypothesis (HA): ___________________________________
+
+```{r}
+# Perform chi-squared test of independence
+chisq_res <- chisq.test(table_data)
+
+# Print the test result
+chisq_res
+```
+results: __________________________________________
+
+```{r}
+library(gmodels)
+CrossTable(table_data, expected=T)
+```
+
+3) You have checked all the assumptions of the chi-square test and they are matched. You have run and correctly interpreted the chi-square test, analysing the standardized residuals (1)
+
+we _____ reject H0
+
+standardized residuals: ______________________________________
+
+
+Part II. The t-test (2.5 points)
+4) The correct choice of variables, a plot with these variables (0.5)
+```{r}
+greece_3 <- greece %>% select(netustm, vote)
+greece_3 <- na.omit(greece_3)
+greece_3$netustm <- as.numeric(greece_3$netustm)
+greece_3$vote <- as.numeric(greece_3$vote)
+greece_3
+```
+
+
+netustm - internet use in minutes
+vote - national elections
+
+```{r}
+
+
+# Create a vector for each vote category (1, 2, 3)
+vote_1 <- subset(greece_3, vote == 1)$netustm
+vote_2 <- subset(greece_3, vote == 2)$netustm
+vote_3 <- subset(greece_3, vote == 3)$netustm #We will not use it
+
+```
+
+```{r}
+ggplot() + labs (title = "Internet use in minutes vs Voting", x="Did people vote on last national elections?", y="") +
+  geom_boxplot(aes(x='Yes', y=vote_1), fill="tomato1") + 
+  geom_boxplot(aes(x='No', y=vote_2), fill="purple4") + 
+  theme_bw()
+```
+5) You have checked the normality assumption for the t-test in 2 different ways (QQ plots / histogram / skew and kurtosis) (0.5)
+
+```{r}
+shapiro.test(vote_1)
+shapiro.test(vote_2)
+var.test(vote_1, vote_2)
+```
+```{r}
+# QQ plot for vote_1
+qqnorm(vote_1)
+qqline(vote_1)
+
+# Histogram for vote_1
+hist(vote_1)
+
+```
+```{r}
+# QQ plot for vote_2
+qqnorm(vote_2)
+qqline(vote_2)
+
+# Histogram for vote_2
+hist(vote_2)
+
+```
+
+```{r}
+library(moments)
+
+# Calculate skewness and kurtosis for vote_1
+skewness(vote_1)
+kurtosis(vote_1)
+
+# Calculate skewness and kurtosis for vote_2
+skewness(vote_2)
+kurtosis(vote_2)
+
+```
+normality: _____________________________
+variances: ________________________________
+parametric: ___________________________
+
+6) The null hypothesis is spelled out, and you make conclusions as to how the results relate to it. You have applied the correct t-test formula and interpreted the result correctly. If the result is statistically significant, the effect size is reported (1)
+
+Null hypothesis: ____________________________________________________
+
+Alternative hypothesis: _______________________________________________________
+
+```{r}
+t.test(vote_1, vote_2, var.equal = TRUE)
+```
+result: _______________________________________
+
+7) You have double-checked your results with a non-parametric test (0.5)
+
+```{r}
+wilcox.test(vote_1, vote_2, alternative = "two.sided")
+```
+result: __________________________________________

@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-02-06"
+---
+
+```{r}
+library(readr)
+
+
+Presidential_elections_2018 <- read_delim("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/Presidential_elections_2018.csv", delim = ";", escape_double = FALSE, col_types = cols(Number_of_voters = col_number(), Absentee_Ballots = col_number(), Station_Ballots = col_number(), Home_Ballots = col_number(),Home_Box_Ballots = col_number(), Station_Box_Ballots = col_number(), Invalid_votes = col_number(), Valid_votes = col_number(), 
+Baburin_votes = col_number(), Grudinin_votes = col_number(), Zhirinovskii_votes = col_number(), Putin_votes = col_number(), Sobchak_votes = col_number(), Suraikin_votes = col_number(), Titov_votes = col_number(), Yavlinskii_votes = col_number()), trim_ws = TRUE)
+Presidential_elections_2018
+```
+The table is constructed with the help of the table1 package and contains all the required variables
+Valid_votes, Invalid_votes, Absentee_Ballots, Home_Ballots, Station_Box_Ballots. 
+
+```{r}
+library(table1)
+Rus_table<-table1(~ Valid_votes + Invalid_votes + Absentee_Ballots + Home_Ballots + Station_Box_Ballots, data=Presidential_elections_2018)
+Rus_table
+```
+The scatterplot is build with the required variables on the x and y axis (correct variables are put on x and y). The plot has a title and a color (any).
+use the variable Home_Ballots for x-axis and variable Valid_votes for y-axis
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+e<-ggplot() +
+  geom_point(data = Presidential_elections_2018, aes(x = Home_Ballots, y = Valid_votes), col="#008080") + 
+  xlab("Home Ballots") +
+  ylab("Valid Ballots") +
+  ggtitle("Home-Valid Ballots Correlation") +
+  theme_bw()
+e
+```
+All regions of the Central Federal District are extracted from the original dataset, the new dataset containing ONLY these regions as rows and ALL the columns (25) from the original dataset is constructed
+
+https://en.wikipedia.org/wiki/Central_Federal_District says there are 18 regions in CFD
+
+```{r}
+library(dplyr)
+Presidential_elections_2018_center<- Presidential_elections_2018 %>% filter(Region == "Belgorod region" | Region == "Vladimir region" | Region == "Voronezh region" | Region == "Bryansk region" | Region == "Ivanovo region" | Region == "Kaluga region" | Region == "Kostroma region" | Region == "Kursk region" | Region == "Lipetsk region" | Region == "Moscow city" | Region == "Moscow region" | Region == "Oryol Region" | Region == "Ryazan Oblast" | Region == "Smolensk region" | Region == "Tambov Region" | Region == "Tver region" | Region == "Tula region" | Region == "Yaroslavskaya oblast")
+Presidential_elections_2018_center
+```
+All 4 boxplots are constructed for the respective variables. 
+
+The boxplots are customised with different colors and have the customisation of the border color (does not matter whether the border colors are different or same for the considered 4 boxplots). 
+
+All the boxplots do have titles and the y-axis captions, there are NO x-axis captions in all boxplots.
+
+```{r}
+Putin<-ggplot() +
+  geom_boxplot(data = Presidential_elections_2018_center, aes(y = Putin_percent), fill="blue", col="#637DAF") + 
+  xlab(" ") + 
+  ylab("Percent of voters") + 
+  ggtitle("Votes for Putin") 
+Grudinin<-ggplot() +
+  geom_boxplot(data = Presidential_elections_2018_center, aes(y = Grudinin_percent), fill="red", col="#637DAF") + 
+  xlab(" ") + 
+  ylab("Percent of voters") + 
+  ggtitle("Votes for Grudinin") 
+Zhirinovskii<-ggplot() +
+  geom_boxplot(data = Presidential_elections_2018_center, aes(y = Zhirinovskii_percent), fill="yellow", col="#637DAF") + 
+  xlab(" ") + 
+  ylab("Percent of voters") + 
+  ggtitle("Votes for Zhirinovskii") 
+Sobchak<-ggplot() +
+  geom_boxplot(data = Presidential_elections_2018_center, aes(y = Sobchak_percent), fill="green", col="#637DAF") + 
+  xlab(" ") + 
+  ylab("Percent of voters") + 
+  ggtitle("Votes for Sobchak") 
+Putin
+Grudinin
+Zhirinovskii
+Sobchak
+
+```
+All plots (4 boxplots and a scatterplot) are put together on ONE graph either with cowplot package or mfrow(). The choice of the function correlates with the method of visualization (ggplot2 or basic R tools)
+
+```{r}
+library(cowplot)
+Russianplot <- plot_grid(Putin, Grudinin, Zhirinovskii, Sobchak)
+Russianplot
+```
+

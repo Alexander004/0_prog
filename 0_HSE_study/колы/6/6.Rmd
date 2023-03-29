@@ -1,0 +1,215 @@
+---
+title: "Seminar 6"
+author: "Aleksei Sorbale"
+date: "2023-02-25"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1. Chi-Square Test of Independence (Association)
+
+**Example 1**. US Presidential elections
+
+The survey done in the US before the 2020 Presidential elections shows
+the following proportions of the electoral preferences of voters in
+Texas and California:
+
+|           | California | Texas |
+|-----------|------------|-------|
+| **Trump** | 2827       | 3738  |
+| **Biden** | 5071       | 1494  |
+
+**Question**: Is the parameter of living in a particular state
+associated with the parameter of voting preferences?
+
+**H0**: There is no association between the parameters (the parameters
+are independent)
+
+```{r}
+#Insert the data
+Trump_prop<-c(3738, 2827)#Trump voters proportion in the samples of Texas and California
+Biden_prop<-c(1494, 5071)#Biden voters proportion in the samples of Texas and California
+US_table<-rbind(Trump_prop, Biden_prop)# rbind() combines vectors into matrix by rows
+colnames(US_table)<-c("Texas", "California")
+rownames(US_table)<-c("Trump", "Biden")
+US_table
+```
+
+Calculate chi-squared
+
+```{r}
+chisq.test(US_table, correct=F)# correct=F: remove the Yates' correction
+```
+
+Get the hypothetical (expected) values (no association between the
+parameters)
+
+```{r}
+#Option 1
+chisq_US<-chisq.test(US_table)
+chisq_US$expected
+
+#Option 2
+#A package with which one can get extended output of the chi-squared test
+library(gmodels)
+CrossTable(US_table, expected=T)#"expected=T" = hypothetical values will be included in the table
+```
+
+**Example 2**. Arab spring
+
+Hoffman M., Jamal A. 2014. Religion in the Arab Spring: Between Two
+Competing Narratives. *Journal of Politics*, vol.76, N3, p. 599
+
+**H0**: In Egypt there is no association between Qur'an reading and
+participation in the protests
+
+**Insert the data for Egypt**
+
+```{r}
+Protest<-c(52,71,326,339,192)
+No_protest<-c(3,10,67,63,46)
+religion_protest<-rbind(Protest,No_protest)
+colnames(religion_protest)<-c("Never reading", "Rarely reading", "Sometimes reading", "Frequent Reading", "Always reading")
+rownames(religion_protest)<-c("Protest", "No protest")
+religion_protest
+```
+```{r}
+install.packages("gplots")
+```
+
+**Graphical display of the cells' magnitude (contengency table)**
+
+```{r}
+library(gplots)
+Egypt_visual <- as.table(religion_protest)
+balloonplot(Egypt_visual, main ="Association between Qur'an reading and protesting in Egypt", xlab ="", ylab="", label = T, show.margins = F)
+
+Egypt_visual
+```
+
+**Calculate chi-squared**
+
+```{r}
+chisq.test(religion_protest, correct=F)
+
+```
+
+**Get the hypothetical values**
+
+```{r}
+chisq_Egypt<-chisq.test(religion_protest, correct=F)
+chisq_Egypt$expected
+round(chisq_Egypt$expected)#round the hypothetical values
+```
+
+## Task 2. Chi-Square Test of Goodness-Of-Fit
+
+Within one month we observe 10 tiktokers making videos with a popular
+challenge. The observable proportion of videos is as follows:
+
+| Tiktoker 1 | Tiktoker 2 | Tiktoker 3 | Tiktoker 4 | Tiktoker 5 | Tiktoker 6 | Tiktoker 7 | Tiktoker 8 | Tiktoker 9 | Tiktoker 10 |
+|----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|
+| 16         | 10         | 3          | 9          | 19         | 12         | 4          | 1          | 5          | 10          |
+
+**Q1**: Do the tiktokers make equal proportion of videos with a popular
+challenge?
+
+**H0**: There is no significant difference between the observed
+proportion and the expected equal proportion.
+
+```{r}
+Tiktokers<-c(16,10,3,9,19,12,4,1,5,10)
+Tiktokes_prop <- chisq.test(Tiktokers, p = c(1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10, 1/10))
+Tiktokes_prop
+```
+
+**Q2**: Is there statistically significant difference between the
+observed and expected proportions of tiktoks?
+
+**H0**: There is no significant difference between the observed and the
+expected proportions.
+
+Expected proportions for best tiktokers:
+
+| Tiktoker 1 | Tiktoker 2 | Tiktoker 5 | Tiktoker 5 | Tiktoker 10 |
+|------------|------------|------------|------------|-------------|
+| 3/10       | 1/10       | 3/10       | 2/10       | 1/10        |
+
+```{r}
+Tiktokers_best<-c(16,10,19,12,10)
+Tiktokes_prop_best <- chisq.test(Tiktokers_best, p = c(3/10, 1/10, 3/10, 2/10, 1/10))
+Tiktokes_prop_best
+```
+
+## Practice. Oceania at war (or not?)
+
+Big Brother made a survey in Oceania concerning the opinion of male and
+female citizens on the war with Eurasia.
+
+1.  Use the survey data to create a matrix:
+
+    1.1. Matrix rows: At war, Not at war, Doubt
+
+    1.2. Matrix columns: Men, Women
+
+    1.3. Proportions for men and women to use to create vectors:
+
+    Men: At war: 34; Not at war: 66; Doubt: 14
+
+    Women: At war: 19; Not at war: 71; Doubt: 13
+
+    1.4. Unify vectors for Men and Women into matrix
+
+    1.5. Use the labels from 1.1. and 1.2. to give names to the columns
+    and rows of the matrix
+    
+```{r}
+men <- c(34, 66, 14)
+women <- c(19, 71, 13)
+matrix_data <- cbind(men, women)
+colnames(matrix_data) <- c("Men", "Women")
+rownames(matrix_data) <- c("At war", "Not at war", "Doubt")
+matrix_data
+```
+    
+
+2.  **H0**: There is no statistically significant association between
+    the parameters of gender and opinion on the war. Calculate the
+    chi-squared of independence to test this hypothesis
+    
+```{r}
+chisq.test(matrix_data, correct = F)
+```
+    
+
+3.  Get the hypothetical values (proportion) for the test
+
+```{r}
+expected_values<-chisq.test(matrix_data, correct=F)
+expected_values$expected
+```
+
+
+4.  Round the hypothetical values (proportion) for the test
+
+```{r}
+round(expected_values$expected)
+```
+
+
+5.  Get extended chi-squared output with `CrossTable()`
+```{r}
+install.packages("gmodels")
+```
+
+```{r}
+library(gmodels)
+CrossTable(matrix_data, expected = T)
+```
+

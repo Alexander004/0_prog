@@ -1,0 +1,137 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-02-21"
+---
+Import the dataset French_Presindential_Election_2017.csv.
+
+```{r}
+library(plotly)
+library(ggplot2)
+library(stringr)
+library(dplyr)
+library(readr)
+French_Presidential_Election_2017 <- read_delim("~/0_HSE_study/колы/5/Data/French_Presidential_Election_2017.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+French_Presidential_Election_2017
+```
+
+
+Filter only the following departments: Alpes-de-Haute-Provence and Ardennes (variable Department).
+
+```{r}
+French_Presidential_Election_2017_n <- French_Presidential_Election_2017 %>% filter(Department == "Alpes-de-Haute-Provence" | Department == "Ardennes")
+French_Presidential_Election_2017_n
+```
+
+
+Filter only the male absentees (Sex == M + variable Abstentions).
+
+```{r}
+French_Presidential_Election_2017_n1 <- French_Presidential_Election_2017_n %>% filter(Sex == "M" ) %>% select(Department, Abstentions)
+French_Presidential_Election_2017_n1
+```
+
+
+Tip 1. In this task, filtration should meet two criteria related to the variables Abstentions and Sex. The options for performing this type of filtration can be found in the scripts for Seminar 2 and Training 2. The datset should contain only the above mentioned variables and observations for Alpes-de-Haute-Provence and Ardennes.
+
+4. Create two samples based on the filtered data:
+
+i. male absentees in Alpes-de-Haute-Provence
+
+```{r}
+abs_Alpes <- French_Presidential_Election_2017_n1 %>% filter(Department == "Alpes-de-Haute-Provence" ) %>% select(Abstentions)
+Alpes_sample = abs_Alpes$Abstentions
+Alpes_sample
+```
+
+
+ii. male absentees in Ardennes
+
+```{r}
+abs_Ardennes <- French_Presidential_Election_2017_n1 %>% filter(Department == "Ardennes" ) %>% select(Abstentions)
+abs_Ardennes_1 = abs_Ardennes$Abstentions
+abs_Ardennes_1
+```
+
+
+Tip 2. The easiest way to complete this task is to create a new object and assign the necessary data from the given variable to it. Technically, the operation can look as follows:
+
+Male_Alpes = Male_Alpes$Abstentions
+
+5. Make these two samples equal in size. There should be 79 observations for male absentees in Ardennes and 42 observations for male absentees in Alpes-de-Haute-Provence. In order to make these two samples equal in size, one should take 42 random observations from the sample for Ardennes and create a new sample based on this data (please check how we performed this operation in the script for Seminar 5).
+
+```{r}
+Ardennes_sample <- sample(abs_Ardennes_1, size = length(Alpes_sample))
+Ardennes_sample
+length(Ardennes_sample) ### Just to check
+```
+```{r}
+Alpes_sample
+Ardennes_sample
+```
+
+
+6. Check the samples for:
+
+i. normality of distribution (put the p-value that you got for this test after #)
+
+```{r}
+shapiro.test(Alpes_sample) ### p-value = 0.0001313
+shapiro.test(Ardennes_sample) ### p-value = 7.208e-06
+```
+
+
+ii. homogeneity of variances (put the p-value that you got for this test after #)
+
+```{r}
+var.test(Alpes_sample, Ardennes_sample) ### p-value = 0.2618
+```
+
+
+7. If the samples satisfy the parametricity criteria, perform the t-test for non-directional hypothesis (H1: The samples are statistically different from each other)
+
+```{r}
+#Since the samples are not normally distributed, we cannot perform a t-test. We need to use a non-parametric test.
+```
+
+
+8. If the samples do not meet the parametricity criteria, perform the Mann-Whitney test for non-directional hypothesis (H1: The samples are statistically different from each other)
+
+```{r}
+wilcox.test(Alpes_sample, Ardennes_sample, alternative = "two.sided") ### p-value = 0.8195
+```
+
+
+9. Perform additional tests to test the following directional hypotheses:
+
+i. On average, the number of male absentees in the Alpes-de-Haute-Provence department is bigger than in the Ardennes department
+
+```{r}
+wilcox.test(Alpes_sample, Ardennes_sample, alternative = "greater") ### p-value = 0.4098 
+```
+
+
+ii. On average, the number of male absentees in the Alpes-de-Haute-Provence department is smaller than in the Ardennes department
+
+```{r}
+wilcox.test(Alpes_sample, Ardennes_sample, alternative = "less") ### p-value = 0.5937
+```
+
+
+10. Build one boxplot for each of the two samples on ONE graph (so, two boxplots on one graph). Customize the boxplots with colors, add labels on the axes (any), give a title to the graph (any). NB! One can use either base R or ggplot2 capacities for this task
+
+```{r}
+library(ggplot2)
+
+df <- data.frame(value = c(Alpes_sample, Ardennes_sample),
+                 group = rep(c("Alpes-de-Haute-Provence", "Ardennes"), each = length(Alpes_sample)))
+
+ggplot(df, aes(x = group, y = value, fill = group)) +
+  geom_boxplot() + xlab("Department") + ylab("Number of Abstentions") + ggtitle("Distribution of Abstentions") +
+  theme(legend.position="none")
+
+```
+
+
+Tip 3. If you're using ggplot2 for visualization and do not remember how to construct several boxplots on one plot, please check the algorithm, which we used for the construction of 4 boxplots for the groups of students in the script for Seminar 5.

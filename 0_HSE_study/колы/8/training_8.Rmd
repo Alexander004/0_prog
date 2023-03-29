@@ -1,0 +1,109 @@
+```{r}
+library(readr)
+All_data_cleared <- read_csv("~/0_HSE_study/колы/training_8/Data/All_data_cleared_2.csv")
+All_data_cleared
+```
+```{r}
+library(dplyr)
+All_data_cleared$`Development Index` <- (All_data_cleared$`Political Stability` + All_data_cleared$`Government Effectiveness` + All_data_cleared$`Rule of Law`) / 3
+All <- select(All_data_cleared, -3, -4, -5)
+All
+attach(All)
+```
+```{r}
+# Regression 1: Political Rights - Development Index
+model1 <- lm(`Political Rights` ~ `Development Index`)
+summary(model1)
+```
+For the Political Rights - Development Index model, the independent variable (Development Index) is significant at the 0.001 level (p-value: 9.803e-12). The coefficient estimate of Development Index is 10.822, indicating a positive relationship between Development Index and Political Rights. The model explains 64.69% of the variability in the dependent variable, and the F-statistic (9.803e-12 < 0,05) indicates that the model has predictive capability.
+
+```{r}
+# Regression 2: Civil Liberties - Development Index
+model2 <- lm(`Civil Liberties` ~ `Development Index`)
+summary(model2)
+```
+For the Civil Liberties - Development Index model, the independent variable (Development Index) is significant at the 0.001 level (p-value: 3.438e-15). The coefficient estimate of Development Index is 15.251, indicating a positive relationship between Development Index and Civil Liberties. The model explains 75.13% of the variability in the dependent variable, and the F-statistic (3.438e-15 < 0,05) indicates that the model has predictive capability.
+
+```{r}
+# Regression 3: GDP per capita - Development Index
+model3 <- lm(`GDP per capita` ~ `Development Index`)
+summary(model3)
+```
+For the Civil Liberties - Development Index model, the independent variable (Development Index) is significant at the 0.001 level (p-value: 6.73e-10). The coefficient estimate of Development Index is 30326, indicating a positive relationship between Development Index and Civil Liberties. The model explains 57,49% of the variability in the dependent variable, and the F-statistic (6.727e-10 < 0,05) indicates that the model has predictive capability.
+
+```{r}
+# Regression 4: Population growth - Development Index
+model4 <- lm(`Population growth` ~ `Development Index`)
+summary(model4)
+```
+For the Population growth - Development Index model, the independent variable (Development Index) is significant at the 0.001 level (p-value: 2.021e-05). The coefficient estimate of Development Index is 0.5478, indicating a positive relationship between Development Index and Population growth. The model explains 33.51% of the variability in the dependent variable, and the F-statistic (2.021e-05 < 0,05) indicates that the model has predictive capability.
+
+```{r}
+library(ggplot2)
+
+# Scatterplot for Civil Liberties vs. Development Index
+cl <- ggplot(data = All, aes(x = `Development Index`, y = `Civil Liberties`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Development Index") +
+  ylab("Civil Liberties") +
+  ggtitle("Relationship between Development Index and Civil Liberties")
+cl
+# Scatterplot for Political Rights vs. Development Index
+pr <- ggplot(data = All, aes(x = `Development Index`, y = `Political Rights`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Development Index") +
+  ylab("Political Rights") +
+  ggtitle("Relationship between Development Index and Political Rights")
+pr
+# Scatterplot for GDP per capita vs. Development Index
+gp <- ggplot(data = All, aes(x = `Development Index`, y = `GDP per capita`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Development Index") +
+  ylab("GDP per capita") +
+  ggtitle("Relationship between Development Index and GDP per capita")
+gp
+# Scatterplot for Population growth vs. Development Index
+pg <- ggplot(data = All, aes(x = `Development Index`, y = `Population growth`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Development Index") +
+  ylab("Population growth") +
+  ggtitle("Relationship between Development Index and Population growth")
+pg
+```
+```{r}
+par(mfrow=c(2,2)) # create a 2x2 grid of plots
+
+# plot 1
+plot(All$`Development Index`, All$`Civil Liberties`, 
+     xlab = "Development Index", ylab = "Civil Liberties", 
+     main = "Civil Liberties model")
+abline(lm(`Civil Liberties` ~ `Development Index`, data = All), col = "red") # add regression line
+
+# plot 2
+plot(All$`Development Index`, All$`Political Rights`, 
+     xlab = "Development Index", ylab = "Political Rights", 
+     main = "Political Rights model")
+abline(lm(`Political Rights` ~ `Development Index`, data = All), col = "red") # add regression line
+
+# plot 3
+plot(All$`Development Index`, All$`Population growth`, 
+     xlab = "Development Index", ylab = "Population growth", 
+     main = "Population growth model")
+abline(lm(`Population growth` ~ `Development Index`, data = All), col = "red") # add regression line
+
+# plot 4
+plot(All$`Development Index`, All$`GDP per capita`, 
+     xlab = "Development Index", ylab = "GDP per capita", 
+     main = "GDP per capita model")
+abline(lm(`GDP per capita` ~ `Development Index`, data = All), col = "red") # add regression line
+
+```
+```{r}
+library(cowplot)
+plot_grid(cl, pr, pg, gp)
+```
+

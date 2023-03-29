@@ -1,0 +1,223 @@
+---
+title: "Seminar 3"
+author: "Aleksei Sorbale"
+date: "2023-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Base R visualization of descriptive statistics**
+
+#### Task 1. Histogram
+
+```{r}
+##Random normal distribution
+
+seminar_3_norm<-rnorm(10000)
+summary(seminar_3_norm)
+
+hist(seminar_3_norm, breaks=100, main="Histogram for Seminar 3",
+     xlab="Seminar 3 normal distribution")# breaks = the intervals between the columns
+abline(v = 0.008839, col="red", lwd=2, lty=2)# v=value, col=color, lwd=line width, lty=type of the line 
+
+
+#dev.off()#remove all visualization
+```
+
+#### Task 2. Boxplots
+
+```{r}
+Karelia <- read.csv("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/Karelia2016.csv", sep=';')
+
+attach(Karelia)
+
+boxplot(United_Russia, main = "Votes for United Russia in Karelia on the 2016 Duma elections",
+xlab = "", ylab ="Number of votes", col = "blue", border = "black")
+
+boxplot(United_Russia, KPRF, LDPR, A_Just_Russia, 
+         main = "Votes for major parliamentary parties on the 2016 Duma elections in Karelia", 
+         names = c("United Russia", "CPRF", "LDPR", "A Just Russia"),
+         col = c("lightblue", "red", "gold1", "darkolivegreen1"), border = "brown")
+
+```
+
+#### Task 3. Scatterplot
+
+```{r}
+
+plot(KPRF, main = "Votes for CPRF in Karelia on the 2016 Duma elections",
+xlab = "№ of PEC", ylab ="Percentage of votes", col = "red")
+
+detach(Karelia)
+```
+
+## Visualization with ggplot2
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+
+elections <- read.csv("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/French_Presidential_Election_2017.csv", sep = ";")
+```
+
+### Task 1. Histogram
+
+The 'fill' argument allows to fill the entire histogram with color. To change the color of the histogram borders, you must also specify the \`col' argument. To change the transparency level of the color used for the fill, use the 'alpha' argument.
+
+Here are ggplot2 customizing materials: <https://ggplot2.tidyverse.org/index.html>
+
+```{r}
+p<-ggplot() +
+  geom_histogram(data = elections, aes(x = Voters), binwidth = 5)#binwidth = change the width of bars
+p
+
+#### Add captions on the axes and the title of the graph
+
+p + ggtitle("Distribution of voters") + 
+  xlab("Number of voters") + 
+  ylab("Quantity")
+
+
+#### Change the appearance of the chart: fill, border colors, transparency
+
+a<-ggplot() +
+  geom_histogram(data = elections, aes(x = Voters), binwidth = 5, fill="#008080", col="#483D8B", alpha = 0.5)  + 
+  ggtitle("Distribution of voters") + 
+  xlab("Number of voters") + 
+  ylab("Quantity")
+a
+
+#### Change the plot's theme.
+
+a + theme_bw()
+a + theme_tufte()
+```
+
+### Task 2. Boxplot
+
+```{r}
+c<-ggplot() +
+  geom_boxplot(data = elections, aes(y = Voters), col = "#E52B50", fill = "#F0F8FF") + 
+  xlab(" ") + 
+  ylab("Number of voters") + 
+  ggtitle("Distribution of voters") + 
+  theme_bw()  
+c
+
+##Comparison of distributions of different constituencies.
+
+d<-ggplot() +
+  geom_boxplot(data = elections, aes(x = Constituency, y = Voters)) + 
+  xlab(" ") + 
+  ylab("Numer of voters") + 
+  ggtitle("Distribution of voters for different constituencies") + 
+  theme(axis.text.x=element_text(angle=90,size=8))
+d
+
+## We can add an additional 'fill' argument to put multiple categorical variables in a single boxplot.
+
+r<-ggplot() +
+  geom_boxplot(data = elections, aes(x = Constituency, y = Voters, fill=Sex)) + 
+  xlab(" ") + 
+  ylab("Numer of voters") + 
+  ggtitle("Distribution of voters for different constituencies by gender") + 
+  theme(axis.text.x=element_text(angle=90,size=8))
+r
+```
+
+### Task 3. Scatterplot
+
+```{r}
+o<-ggplot() +
+  geom_point(data = elections, aes(x = Abstentions, y = Voters)) +
+  xlab("Abstentions") +
+  ylab("Number of voters") +
+  ggtitle("Distribution of voters in different departments")
+o
+
+### Change the shape depending on the group (same with color)
+
+o<-ggplot() +
+  geom_point(data = elections, aes(x = Abstentions, y = Voters, shape = Sex)) +
+  xlab("Abstentions") +
+  ylab("Number of voters") +
+  ggtitle("Distribution of voters in different departments") +
+  theme_bw()
+o
+```
+
+### Task 4 Combine all the plots on one graph
+
+```{r}
+library(cowplot)
+Frenchplots <- plot_grid(a, r, o)
+Frenchplots
+```
+
+### Practice. 2016 parliamentary elections: UR (ggplot2)
+
+1.  Import the dataset "ENPG2016.csv
+2.  Build a histogram for the variable 'Turnout'
+3.  Customize the histogram: give it a title (any relevant) and y caption (any relevant), change its basic ('fill') and bars' borders ('col') colors, change the width of bars (any value relevant)
+4.  Change the histogram's theme
+5.  Build a scatterplot for the variables 'Turnout'(x-axis) and 'ER' (y-axis)
+6.  Customize the scatterplot: give it a title (any relevant) and x-y captions (any relevant), change its basic color
+7.  Combine a histogram and a scatterplot on one graph with cowplot package
+```{r}
+install.packages("tidyverse")
+library("tidyverse")
+```
+
+```{r}
+ENPG2016 <- read_delim("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/ENPG2016.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Turnout = col_number(), 
+        ER = col_number(), KPRF = col_number(), 
+        LDPR = col_number(), SR = col_number(), 
+        KR = col_number(), Yabloko = col_number(), 
+        RPPS = col_number(), Rodina = col_number(), 
+        PR...11 = col_number(), Zelenye = col_number(), 
+        PNS = col_number(), PR...14 = col_number(), 
+        GP = col_number(), GS = col_number()), 
+    trim_ws = TRUE)
+ENPG2016
+```
+
+```{r}
+t<-ggplot() +
+  geom_histogram(data = ENPG2016, aes(x = Turnout), binwidth = 5, fill="#008080", col="#483D8B", alpha = 0.5)  + 
+  ggtitle("Turnout") + 
+  xlab("Turnout") + 
+  ylab("Frequency")
+t + theme_bw()
+t
+```
+```{r}
+e<-ggplot() +
+  geom_point(data = ENPG2016, aes(x = Turnout, y = ER), col="#008080") + 
+  xlab("Turnout") +
+  ylab("Votes for ER") +
+  ggtitle("Turnout-ER") +
+  theme_bw()
+e
+c<-ggplot() +
+  geom_point(data = ENPG2016, aes(x = Turnout, y = ER), col="#008080") +
+  geom_point(data = ENPG2016, aes(x = Turnout, y = KPRF), col="#E52B50") +
+  geom_point(data = ENPG2016, aes(x = Turnout, y = LDPR), col="#ABC322") +
+  geom_point(data = ENPG2016, aes(x = Turnout, y = SR), col="#D9A802") +
+  xlab("Turnout") +
+  ylab("Votes for Party") +
+  ggtitle("Turnout-Party") +
+  theme_bw()
+c
+```
+```{r}
+library(cowplot)
+Russianplot <- plot_grid(t, e)
+Russianplot
+```
+
+```
+

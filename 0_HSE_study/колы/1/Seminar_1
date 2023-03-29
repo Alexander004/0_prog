@@ -1,0 +1,285 @@
+library('car')
+``
+---
+{r}
+install.packages('car')
+install.packages('ggplot2')
+install.packages('foreign')
+print(subjects)
+print(subjects)
+subjects <-c ("Maths", "Geography")
+print(subjects)
+marks <-c (10, 9)
+print(marks)
+table = data.frame(Subject = subjects, Marks = marks)
+source("~/.active-rstudio-document")
+source("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/1/seminar1.R")
+### R as calculator. Mathematical symbols: +, -, *, /, ^
+1+1
+2-1
+4/2
+4^2
+knitr::opts_chunk$set(echo = TRUE)
+### R as calculator. Mathematical symbols: +, -, *, /, ^
+1+1
+2-1
+4/2
+4^2
+### R as calculator. Mathematical functions: sqrt(), sum(), log(), log10(), log2(), log(x, base = y)
+sqrt(121)
+sum(12,13,14,15)
+log(10)
+log10(100)
+log(1, base=10)
+# First option
+index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
+sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+# Second option
+sum_index_2011<-0
+for(i in index_2011)#for...in expression loop
+{sum_index_2011<-(i/(i+max(index_2011)^2-i^2))+sum_index_2011
+}
+sum_index_2011
+### R as calculator. Mathematical functions: sqrt(), sum(), log(), log10(), log2(), log(x, base = y)
+sqrt(121)
+sum(12,13,14,15)
+log(10)
+log10(100)
+log(1, base=10)
+help("cor")
+# First option
+index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
+sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+# Second option
+sum_index_2011<-0
+for(i in index_2011)#for...in expression loop
+{sum_index_2011<-(i/(i+max(index_2011)^2-i^2))+sum_index_2011
+}
+sum_index_2011
+getwd()# get the current working directory
+setwd()# set the new working directory
+data_1<-c(1:5)
+data_2<-c(6:10)
+table_1<-data.frame(data_1,data_2)
+colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_1)<-c("Digit 1", "Digit 2", "Digit 3", "Digit 4", "Digit 5")#give names to table rows
+table_1
+data_1<-c(1:5)
+data_2<-c(6:10)
+table_1<-data.frame(data_1,data_2)
+colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_1)<-c("Digit 1", "Digit 2", "Digit 3", "Digit 4", "Digit 5")#give names to table rows
+table_1
+digit <- c(1, 2, 3)
+digit
+install.packages("rstudioapi")
+oceanic_theme <- "https://raw.githubusercontent.com/gadenbuie/oceanic-eighties/master/oceanic-eighties.rstheme"
+rstudioapi::addTheme(oceanic_theme, apply = TRUE)
+install.packages("rstudioapi")
+oceanic_theme <- "https://raw.githubusercontent.com/gadenbuie/oceanic-eighties/master/oceanic-eighties.rstheme"
+rstudioapi::addTheme(oceanic_theme, apply = TRUE)
+install.packages("rstudioapi")
+knitr::opts_chunk$set(echo = TRUE)
+### R as calculator. Mathematical symbols: +, -, *, /, ^
+1+1
+2-1
+4/2
+4^2
+### R as calculator. Mathematical functions: sqrt(), sum(), log(), log10(), log2(), log(x, base = y)
+sqrt(121)
+sum(12,13,14,15)
+log(10)
+log10(100)
+log(1, base=10)
+help("cor")
+digit <- c(1, 2, 3)
+digit
+# First option
+index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
+sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+# Second option
+sum_index_2011<-0
+for(i in index_2011)#for...in expression loop
+{sum_index_2011<-(i/(i+max(index_2011)^2-i^2))+sum_index_2011}
+sum_index_2011
+getwd()# get the current working directory
+setwd()# set the new working directory
+# First option
+index_2011<-c(0.4931,0.1919,0.1325,0.1168,0.0343,0.0097,0.006)
+sum(index_2011/(index_2011+max(index_2011)^2-index_2011^2))
+# Second option
+sum_index_2011<-0
+for(i in index_2011)#for...in expression loop
+{sum_index_2011<-(i/(i+max(index_2011)^2-i^2))+sum_index_2011}
+sum_index_2011
+getwd()# get the current working directory
+setwd()# set the new working directory
+data_1<-c(1:5)
+data_2<-c(6:10)
+table_1<-data.frame(data_1,data_2)
+colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_1)<-c("Digit 1", "Digit 2", "Digit 3", "Digit 4", "Digit 5")#give names to table rows
+table_1
+data_1<-c(1:5)
+data_2<-c(6:10)
+table_1<-data.frame(data_1,data_2)
+colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_1)<-c("Digit 1", "Digit 2", "Digit 3", "Digit 4", "Digit 5")#give names to table rows
+table_1
+data_Moscow<-c("Moscow", "CFD", 12500)
+data_SPb<-c("St. Petersburg", "NWFD", 5600)
+data_Kazan<-c("Kazan", "VFD", 1243)
+data_Volga<-c("Volgograd", "SFD", 1013)
+data_Nov<-c("N. Novgorod", "VFD", 1257)
+data_Vlad<-c("Vladivostok", "FEFD", 605)
+table_2<-data.frame(data_Moscow,data_SPb,data_Kazan,data_Volga,data_Nov,data_Vlad)
+#colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_1)<-c("City", "District", "Population")#give names to table rows
+data_Moscow<-c("Moscow", "CFD", 12500)
+data_SPb<-c("St. Petersburg", "NWFD", 5600)
+data_Kazan<-c("Kazan", "VFD", 1243)
+data_Volga<-c("Volgograd", "SFD", 1013)
+data_Nov<-c("N. Novgorod", "VFD", 1257)
+data_Vlad<-c("Vladivostok", "FEFD", 605)
+table_2<-data.frame(data_Moscow,data_SPb,data_Kazan,data_Volga,data_Nov,data_Vlad)
+#colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_2)<-c("City", "District", "Population")#give names to table rows
+table_2
+View(table_2)
+View(table_2)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013m 1257, 605)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+data_Moscow<-c("Moscow", "CFD", 12500)
+data_SPb<-c("St. Petersburg", "NWFD", 5600)
+data_Kazan<-c("Kazan", "VFD", 1243)
+data_Volga<-c("Volgograd", "SFD", 1013)
+data_Nov<-c("N. Novgorod", "VFD", 1257)
+data_Vlad<-c("Vladivostok", "FEFD", 605)
+table_2<-data.frame(data_Moscow,data_SPb,data_Kazan,data_Volga,data_Nov,data_Vlad)
+#colnames(table_1)<-c("Group 1", "Group 2")#give names to table columns
+rownames(table_2)<-c("City", "District", "Population")#give names to table rows
+table_2
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+rownames(table_2)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+rownames(table_2)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+rownames(table_2)<-c("City", "District", "Population")
+t(table_3)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+rownames(table_2)<-c("City", "District", "Population")
+t(table_3)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+rownames(table_2)<-c("City", "District", "Population")
+t(table_3)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+rownames(table_3)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+rownames(table_3)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+rownames(table_3)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+t(table_3)
+colnames(table_3)<-c("City", "District", "Population")
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+t(table_3)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+t(table_3)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+t(table_3)
+table_3
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+t(table_3)
+table_3
+t(table_3)
+table_3
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+f=t(table_3)
+f
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+f=t(table_3)
+f
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+f=t(table_3)
+f
+View(f)
+View(f)
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+table_3
+data_cities<-c("Moscow", "St. Petersburg", "Kazan", "Volgograd", "N. Novgorod", "Vladivostok")
+data_disctricts<-c("CFD", "NWFD", "VFD", "SFD", "VFD", "FEFD")
+data_populations<-c(12500, 5600, 1243, 1013, 1257, 605)
+table_3<-data.frame(data_cities,data_disctricts,data_populations)
+colnames(table_3)<-c("City", "District", "Population")
+table_3
+### Saving scripts and opening saved scripts
+savehistory("Seminar_1")

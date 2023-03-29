@@ -1,0 +1,250 @@
+---
+title: "DAiS Entrance test"
+author: "Dmitry Arkatov, Olesya Volchenko"
+output: html_document
+date: '2023-01-11'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(data.table)
+library(tidyverse)
+```
+
+
+For tasks 1-9 we'll be using a data set on penguins from Palmer Station. You can either load it using the package palmerpenguins, or by accessing a github directory of the package.
+Load the dataset any way you're familiar with. 
+
+# Task 1
+How many variables there are in the dataset? How many of them contain numeric values? (Report the values in the google form)
+
+```{r}
+library(palmerpenguins)
+str(penguins)
+#8 variables: 2 numeric and 3 integers, but the integers are usually considered a subclass of numerics
+```
+
+
+# Task 2
+Calculate the mean value of flipper length. (Report the value in the google form)
+
+```{r}
+mean(penguins$flipper_length_mm, na.rm = T)
+#200.9152 (201)
+```
+# Task 3
+What are the minimal and maxumal values of flipper length in the dataset? Report both values in the google form.
+```{r}
+min(penguins$flipper_length_mm, na.rm = T) #172
+max(penguins$flipper_length_mm, na.rm = T) #231
+```
+
+# Task 4
+Calculate the mean value of flipper length for the Adele penguins only. Report the value in the google form.
+```{r}
+p <- penguins %>% 
+  filter(species == "Adelie")
+mean(p$flipper_length_mm, na.rm = T)
+#189.9536 (190)
+```
+
+
+# Task 5
+In the dataset flipper length variable is measured in milimeters. Create a new variable named flipper_length_cm that will show flipper length in centimetes. Paste the code into the google form.
+```{r}
+penguins$flipper_length_cm <- penguins$flipper_length_mm/10
+```
+
+# Task 6
+What is the percentage of penguins from Biscoe island in the dataset?
+```{r}
+nrow(penguins[penguins$island == "Biscoe",]) * 100 / nrow(penguins)
+#48.83721 (49)
+```
+
+
+# Task 7
+Now, let's make a histogram visualising bill length distribition. 
+Paste the code creating the graph into the google form.
+
+```{r}
+hist(penguins$bill_length_mm)
+
+#or you can use something like that
+
+ggplot(penguins) +
+  geom_histogram(aes(x = bill_length_mm))
+```
+
+Additional task (7.1):
+Adjust the plot according to the following requirements.
+a) theme must be minimalist
+b) x-axis naming must reflect the variable visualized, y-axis naming must be blank
+c) the requirements for title is as follows: size must be 20, face written in bold, height adjusted by 0.5
+d) the subtitle must indicate the number of bins
+e) the legend must have "type of penguin" title
+
+```{r}
+ggplot(penguins)+
+  geom_histogram(aes(x=bill_length_mm),
+                 alpha=0.5)+
+  theme_minimal() +
+  labs(title = "Bill Length Histogram",
+       subtitle="The number of bins is 100", #may be named differently, depending on the number of bins used
+    x="Bill Length, mm", #may be named differently
+    y=NULL,
+    fill="Type of Penguin")+
+  theme(plot.title = element_text(face = "bold", size = 20, vjust = 0.5))
+```
+Report the code for the updated plot in the google form as well.
+
+# Task 8
+Let's proceed with visualization. This time your task to visualize the relationship between bill length and depth. Describe in your own words what do you see on the plot? Is there a relationship between those two variables?
+
+```{r}
+ggplot(penguins) +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm))
+
+#the code may be a bit different
+#without proper color grouping it is hard to tell whether there is any relationship between the variables
+```
+
+
+Paste your code into the google form, report your brief interpretation as well.
+
+Additional task (8.1):
+Adjust the plot according to the following requirements.
+
+a) Observations on the graph must be colored according to the species type. 
+b) The theme must be with white background and black gridlines.
+c) You must set up a scale for each variable (in millimeters), including limits or breaks (of your liking)
+d) Each axis must be have a proper name, according to a variable it indicates.
+e) You should set up a title for your graph as well as an inscription (a caption) of where does the data come from. You need to change the face to bold, size to 20 and adjust the height as you prefer. The subtitle must be in italic face, size is 10, and height-adjusted as you like.
+
+Report the code for the updated plot in the google form as well.
+```{r}
+ggplot(penguins)+
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm, color = species)) + #if variables are assigned vice versa it is acceptable
+  scale_color_manual(values = c("#19a6b3","#f26c0d","#5e3894")) + #any color is okay
+  scale_x_continuous(limits=c(40,50)) + #any limit or breaks will suffice
+  scale_y_continuous(limits=c(15,20)) + #any limit or breaks will suffice
+  theme_bw() +
+  labs(x= "bill length, mm", y="bill depth, mm",
+       title = "Penguins characteristics", #a title, may be of any sort
+       subtitle = "Types of penguins we can observe at Palmer Station", #the same for the subtitle
+       caption = "Source: Palmer Station Observations") + #and for the source
+  theme(plot.title = element_text(face = "bold", size = 20, vjust = 0.5), #height adjustment may be any
+        plot.subtitle = element_text(face = "italic", size = 10, vjust = 0.5), #height adjustment may be any
+        panel.grid.minor = element_line(color = "black"))
+```
+
+
+
+For the tasks 9-11 you need to download the dataset indicating the performance of the Russian Universities in 2013 - 2017. https://www.data-in.ru/data-catalog/datasets/169/ Load the dataset.
+
+# Task 9
+Fix the variables types as well as encoding issues. Keep only the following variables: federal_district, region_code, okato, name_short, year, ege_budg, scopus, pk, total_income, e6
+
+```{r}
+library(readr)
+rus_unis <- read_delim("a path to your file must be here", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+rus_unis_selected_vars_only <- rus_unis %>% 
+  select(federal_district, region_code, okato, name_short, year, ege_budg, scopus, pk, total_income, e6)
+
+names <- c(1,3, 4)
+rus_unis_selected_vars_only[, names] <- lapply(rus_unis_selected_vars_only[, names], factor)
+
+
+#since it is pretty much useless to utilitize district and university names as they are we need to convert it to factors
+#also you have to convert okato, since it is basically a code of municipal district and thus can be a categorical predictor
+```
+Paste the code from this task to the google form.
+
+# Task 10
+
+For the variable 'ege_budg' find top 10 universities with the highest mean value over the all years.
+```{r}
+top_ten <- rus_unis %>% 
+  group_by(name_short) %>% 
+  summarise(ege_budg = mean(ege_budg, na.rm = T)) %>% 
+  arrange(desc(ege_budg)) %>% 
+  slice_head(n = 10)
+
+#results in the dataset
+```
+
+# Task 11
+
+For these top ten universities, build a graph showing the change of ege_budg over time. Justify your choice of a graph and interpret the results in a short paragraph. 
+
+```{r}
+ggplot(rus_unis %>% 
+         filter(name_short %in% top_ten$name_short)) +
+  geom_line(aes(x = year, y = ege_budg, group = name_short)) 
+#this will suffice
+#interpretation may be any since its not much we can tell from looking at graph 
+```
+
+
+For tasks 12-14 you're going to manipulate and work with the dataset on crop yields. The dataset can be accessed by the following link https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv
+
+#Task 12
+Explain what the following code does to the original dataframe.
+```{r}
+key_crop_yields <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv') %>% 
+  pivot_longer(cols = 4:14,names_to="crop",values_to="yield") %>% 
+  mutate(yield=as.numeric(yield)) %>% 
+  drop_na(yield) %>% 
+  mutate(crop=case_when(
+    crop=="Wheat (tonnes per hectare)"~"Wheat",
+    crop=="Rice (tonnes per hectare)"~"Rice",
+    crop=="Maize (tonnes per hectare)"~"Maize",    
+    crop=="Soybeans (tonnes per hectare)"~"Soybeans",
+    crop=="Potatoes (tonnes per hectare)" ~"Potatoes",
+    crop=="Beans (tonnes per hectare)"~"Beans",
+    crop=="Peas (tonnes per hectare)"~"Peas",
+    crop=="Barley (tonnes per hectare)"~"Barley"
+  ))
+
+russia_crops<-key_crop_yields %>% 
+  filter(Entity=="Russia")
+
+#this basically turns the panel from a wider to a longer format and removes excessive symbols in naming, drop non-present values and fixes variable type
+#subsequently, the code keeps only the observations from Russia
+```
+
+#Task 13
+
+Visualize the trend of wheat harvesting from 1992 to 2018. The graph must be titled accordingly and all the variables axises must have proper naming. Add any graph theme of your liking. The title must be of size 15, and height-adjusted by 0.5. The year axis must have breaks every two years. 
+```{r}
+ggplot(russia_crops %>% 
+         filter(crop=="Wheat"))+
+  geom_line(aes(x=Year,y=yield))+
+  scale_x_continuous(breaks = seq(1992,2018,2))+
+  theme_minimal()+
+  labs(x="Year",
+       y="Tonnes per hectare",
+       title = "Wheat harversing in Russia")+
+  theme(plot.title = element_text(size = 15, vjust = 0.5))
+```
+
+#Task 14
+Now, visualize the trends for the harvest rates for all the crops separately. Use the dark pallet from brewer color pack to color the graphs. You can pick any background theme. The legends must be removed.
+
+```{r}
+ggplot(russia_crops) +
+  geom_line(aes(x = Year,y = yield, group = crop, color = crop))+
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
+  theme_minimal()+
+  labs(x="Year",
+       y="Tonnes per hectares",
+       title = "Crops harversting in Russia, 1992 - 2018") +
+  facet_wrap(~crop, scales = "free", nrow = 4) +
+  theme(plot.title = element_text(size = 18, vjust = 0.5),
+        legend.position = "none")
+```

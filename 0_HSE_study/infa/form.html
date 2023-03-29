@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <form action="http://185.182.111.214:7628/cgi-bin/form_action.py" method='get' target='_self'>
+
+
+      <label>1. Название книги</label>
+      <select>
+        <option>Война и мир</option>
+        <option>Анна Каренина</option>
+        <option>Чук и Грек</option>
+      </select><br>
+
+      <label>2. Координаты клиента</label><br>
+      Фамилия: <input type="text"> Имя:<input type="text"> Отчество: <input type="text"><br>
+
+      <label>3. Заказать:</label> <input type="number">шт. по цене <input type="number"> руб. <br>
+
+      <p>4. Место проживания:
+        <input name="place" type="Radio" value="Moscow">Москва
+        <input name="place" type="Radio" value="Nizhny">Нижний
+        <input name="place" type="Radio" value="Bor" checked>Бор
+    </p>
+
+    <label>5. Время получения заказа:</label>
+      <input type="checkbox">10-12
+      <input type="checkbox">12-14
+      <input type="checkbox">14-16 <br>
+
+    <label>6. Дополнительная информация:</label><br>
+    <textarea>Для дополнительной информации</textarea> <br>
+    <label>7. Пароль</label> <input type='password'><br>
+    <input type="button" value="Обновить" onClick="reload"><input class ='btn' name="submit" type="Submit" value="Отправить">
+    </form>
+  </body>
+</html>

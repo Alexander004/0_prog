@@ -1,0 +1,394 @@
+---
+title: "Seminar 4"
+author: "Aleksei Sorbale"
+date: "2023-02-09"
+output: html_document
+---
+
+```{r}
+#install.packages("plotly")
+library(plotly)
+library(ggplot2)
+library(stringr)
+library(dplyr)
+library(readr)
+vdem<- read.csv("Data/v-dem-filtered_2020.csv", sep=',')
+vdem
+attach(vdem)
+```
+
+### Variables' description
+
+-   Control of corruption --- estimate (e_wbgi_cce)
+
+-   Freedom House status (e_fh_status)
+
+-   Region (politico-geographic) (E) (e_regionpol)
+
+-   Region (politico-geographic 6-category) (e_regionpol_6C)
+
+-   Government censorship effort --- Media (C) (v2mecenefm)
+
+-   Internet censorship effort (C) (v2mecenefi)
+
+-   Media self-censorship (C) (v2meslfcen)
+
+-   Media corrupt (C) (v2mecorrpt)
+
+-   Person of the Leader (C) (v2exl_legitlead)
+
+-   Regimes of the world -- the RoW measure (D) (v2x_regime)
+
+-   Accountability index (D) (v2x_accountability)
+
+-   Government dissemination of false information domestic (C) (v2smgovdom)
+
+-   Government dissemination of false information abroad (C) (v2smgovab)
+
+-   Government Internet filtering capacity (C) (v2smgovfilcap)
+
+-   Government Internet shut down capacity (C) (v2smgovshutcap)
+
+-   Government Internet shut down in practice (C) (v2smgovshut)
+
+-   Government social media monitoring (C) (v2smgovsmmon)
+
+-   Government social media censorship in practice (C) (v2smgovsmcenprc)
+
+-   Government capacity to regulate online content (C) (v2smregcap)
+
+-   Average people's use of social media to organize offline action (C) (v2smorgavgact)
+
+-   Arrests for political content (C) (v2smarrest)
+
+Please read more on the variables in the codebook: <https://www.v-dem.net/static/website/img/refs/codebookv111.pdf>
+
+# Plotly
+
+**Plotly** is a tool for interactive visualization. Here is the detailed tutorial <https://plotly-r.com/> and the main plots <https://plot.ly/r/plotly-fundamentals/>
+
+### **Task 1. Exploratory analysis**
+
+Let's look at the general information about the dataset and its variables:
+
+```{r}
+summary(vdem)
+```
+
+Let's see how many free/partly free/not free regimes are there:
+
+```{r}
+vdem %>% group_by(e_fh_status) %>% count() 
+
+#1: Free. 
+#2: Partly Free. 
+#3: Not Free.
+```
+
+Now let's look at the number of different regime types
+
+```{r}
+vdem %>% group_by(v2x_regime) %>% count()
+
+#0: Closed autocracy
+#1: Electoral autocracy
+#2: Electoral democracy
+#3: Liberal democracy
+```
+
+Consider the number of countries in each politico-geographic region
+
+```{r}
+vdem %>% group_by(e_regionpol_6C) %>% count()
+
+#1: Eastern Europe and Central Asia 
+#2: Latin America and the Caribbean
+#3: The Middle East and North Africa 
+#4: Sub-Saharan Africa
+#5: Western Europe and North America (including Cyprus, Australia and New Zealand)
+#6: Asia and Pacific (excluding Australia and New Zealand)
+```
+
+## **Task 2. Pie-chart**
+
+We want to make a 'pie' consisting of different regime types. There are 4 regime types: Closed autocracy, Electoral autocracy, Electoral democracy and Liberal democracy. How many of each type do we have? Exploratory analysis has the answer to this question. Let's put this information into the code!
+
+```{r}
+
+labels = c('Closed autocracy','Electoral autocracy','Electoral democracy','Liberal democracy')
+values = c(25, 64, 54, 36)
+colors <- c("#2f7fbc", '#084083', 'bbd7eb', '#7eb8da')
+
+a <- plot_ly(type='pie', labels=labels, values=values, 
+               textinfo='label+percent',
+               insidetextorientation='radial',
+               textposition = 'inside',
+               insidetextfont = list(color = '#FFFFFF'),
+                            hoverinfo = 'text',
+               text = ~paste(values, 'countries'),
+               marker = list(colors = colors,
+                      line = list(color = '#FFFFFF', width = 1)),
+        showlegend = FALSE)
+a
+```
+
+## Task 2. Scatterplot
+
+Consider the relationship between the personality of the leader and accountability index.
+
+```{r}
+
+b <- plot_ly(data = vdem, x = ~v2exl_legitlead, y= ~v2x_accountability)
+b
+
+
+```
+
+Let's make some improvements! For example, one can add the regime type to the plot using different colors. We can also add the title, the names of the x and y axes and the title of the legend.
+
+```{r}
+
+vdem = vdem %>% mutate(
+regime = case_when(
+v2x_regime == 0 ~ "Closed autocracy",
+v2x_regime == 1 ~ "Electoral autocracy",
+v2x_regime == 2 ~ "Electoral democracy",
+v2x_regime == 3 ~ "Liberal democracy"
+)) 
+
+c <- plot_ly(data = vdem, x = ~v2exl_legitlead, y= ~v2x_accountability, color = ~regime,  type = "scatter") %>% 
+  layout(title = "The relationship between the leader personality and accountability in different regime types", xaxis = list(title = 'To what extent the leader is seen as exceptional'), 
+         yaxis = list(title = 'Accountability Index'), legend = list(title=list(text='Regime type')))
+c
+```
+
+## Task 3. Interactive boxplots via plot_ly
+
+**Government dissemination of false information domestic (C) (**`v2smgovdom`**)**
+
+Let us show the distribution of Government dissemination of false information domestically across different politico-geographical regions.
+
+***Question***: How often do the government and its agents use social media to disseminate misleading viewpoints or false information to influence its own population?
+
+***Responses***:
+
+0: Extremely often. The government disseminates false information on all key political issues. 1: Often. The government disseminates false information on many key political issues. 2: About half the time. The government disseminates false information on some key political issues, but not others. 3: Rarely. The government disseminates false information on only a few key political issues. 4: Never, or almost never. The government never disseminates false information on key political issues.
+
+```{r}
+Vdem2 = vdem %>% select(e_regionpol_6C,v2smgovdom)  
+
+Vdem2 = Vdem2 %>% mutate(
+regions = case_when(
+e_regionpol_6C == 1 ~ "Eastern Europe and Central Asia",
+e_regionpol_6C == 2 ~ "Latin America and the Caribbean",
+e_regionpol_6C == 3 ~ "The Middle East and North Africa",
+e_regionpol_6C == 4 ~ "Sub-Saharan Africa",
+e_regionpol_6C == 5 ~ "Western Europe and North America",
+e_regionpol_6C == 6 ~ "Asia and Pacific"
+)) 
+
+#We are making the plot in ggplot, but then pass it to the ggplotly function
+
+p <- ggplot(Vdem2) + geom_boxplot(aes(x = regions, y = v2smgovdom), fill = "#7eb8da")+
+theme(axis.text.x=element_text(hjust= 1)) + theme_light()+
+ylab("") + xlab("Politico-geographic region") + ggtitle("Government dissemination of false information domestically across political regions")+
+geom_boxplot(data = Vdem2 %>% filter(regions == "Western Europe and North America"),
+aes(x = regions, y = v2smgovdom), fill = "#084083") +
+theme(axis.text.x = element_text(angle=30, hjust=1))
+
+ggplotly(p)
+
+```
+
+## Task 3. Bar plot
+
+**Government censorship effort --- Media (**`v2mecenefm`**)**
+
+Consider the top-20 states with strong direct attempt to censor the media.
+
+***Question***: Does the government directly or indirectly attempt to censor the print or broadcast media?
+
+***Responses***:
+
+0: Attempts to censor are direct and routine. 1: Attempts to censor are indirect but nevertheless routine. 2: Attempts to censor are direct but limited to especially sensitive issues. 3: Attempts to censor are indirect and limited to especially sensitive issues. 4: The government rarely attempts to censor major media in any way, and when such exceptional attempts are discovered, the responsible officials are usually punished
+
+```{r}
+Vdem3 = vdem %>% select(country_name, v2mecenefm) %>% top_n(-30, v2mecenefm) %>% arrange(v2mecenefm)
+
+graph <- plot_ly(Vdem3,
+y = ~country_name,
+x = ~v2mecenefm,
+type = "bar", 
+color = ~v2mecenefm,
+colors = "Oranges") %>%
+layout(title = "Top-20 the states with the strongest governmental censorship effort — Media",
+       xaxis = list(title = "Attempts to censor the media"), 
+       yaxis = list(title = "Country", 
+       categoryorder = "array",
+       categoryarray = ~v2mecenefm),
+       showlegend = FALSE) %>% 
+  colorbar(title = 'Scale of attempts to censor the media')
+
+graph
+```
+
+## Task 4. Map
+
+**Internet censorship effort (C) (**`v2mecenefi`**)**
+
+***Question***: Does the government attempt to censor information (text, audio, or visuals) on the Internet?
+
+***Responses***:\
+0: The government successfully blocks Internet access except to sites that are pro-government or devoid of political content. 1: The government attempts to block Internet access except to sites that are pro-government or devoid of political content, but many users are able to circumvent such controls. 2: The government allows Internet access, including to some sites that are critical of the government, but blocks selected sites that deal with especially politically sensitive issues. 3: The government allows Internet access that is unrestricted, with the exceptions mentioned above.
+
+```{r}
+
+# specify map projection/options
+g <- list(
+  #showframe = FALSE,
+  #showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+
+fig <- plot_geo(vdem)
+fig <- fig %>% add_trace(
+    z = ~v2mecenefi, color = ~v2mecenefi, colors = 'Reds',
+    text = ~country_name, locations = ~country_text_id
+  )
+fig <- fig %>% colorbar(title = "Scale of Internet censorship attempts")
+fig <- fig %>% layout(
+    title = "Governments' attempt to censor the Internet across the world",
+    geo = g
+  )
+
+fig
+```
+
+### 
+
+## Practice. Repressive digital capacity
+
+1\. Build an interactive map which illustrates Government Internet filtering capacity (`v2smgovfilcap`) only in countries of [Eastern Europe and Central Asia]{.underline}
+
+1.1 Filter data for the region (`e_regionpol_6C == 1`)
+
+1.2 Build a map:
+
+-   use correct variable (`v2smgovfilcap`)
+
+-   create an appropriate title
+
+-   add the legend
+
+2.  Create a new dataset:
+
+-   leave only Russia, Turkmenistan, Belarus, Kazakhstan and Azerbaijan
+
+-   Leave only the variables `v2smgovfilcap`, `v2smgovshutcap`, `v2smgovsmmon`, `v2smregcap`, `v2smarrest` and country name
+
+3.  Create 2 interactive bar plots with titles, appropriate captions and legend:
+
+    3.1 Arrests for political content
+
+    3.2 Government shutdown capacity
+
+4.  Create an interactive scatterplot for showing the relationship between the government censorship effort in the media field (`v2mecenefm`) and control of corruption (`e_wbgi_cce`)
+
+    4.1 Create the plot's skeleton
+
+    4.2. Add colored categorization on political regime (`v2x_regime`)
+    
+    
+```{r}
+
+#1\. Build an interactive map which illustrates Government Internet filtering capacity (`v2smgovfilcap`) only in countries of [Eastern Europe and Central Asia]{.underline}
+#
+#1.1 Filter data for the region (`e_regionpol_6C == 1`)
+#
+#1.2 Build a map:
+#
+#-   use correct variable (`v2smgovfilcap`)
+#
+#-   create an appropriate title
+#
+#-   add the legend
+
+
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+
+vdem_l <- vdem %>% filter(e_regionpol_6C == 1)
+
+fig <- plot_geo(vdem_l)
+fig <- fig %>% add_trace(
+    z = ~v2smgovfilcap, color = ~v2smgovfilcap, colors = 'Oranges',
+    text = ~country_name, locations = ~country_text_id
+  )
+fig <- fig %>% colorbar(title = "Scale of Internet censorship attempts")
+fig <- fig %>% layout(
+    title = "Government Internet filtering capacity",
+    geo = g
+  )
+
+fig
+```
+```{r}
+#2.  Create a new dataset:
+#
+#-   leave only Russia, Turkmenistan, Belarus, Kazakhstan and Azerbaijan
+#
+#-   Leave only the variables `v2smgovfilcap`, `v2smgovshutcap`, `v2smgovsmmon`, `v2smregcap`, `v2smarrest` #and country name
+
+vdem_n <- vdem %>% filter(country_name == "Russia" | country_name == "Turkmenistan" | country_name == "Belarus" | country_name == "Kazakhstan" | country_name == "Azerbaijan")
+
+New_vdem = vdem_n %>% select(country_name      ,v2smgovfilcap,v2smgovshutcap,v2smgovsmmon,v2smregcap,v2smarrest)  
+New_vdem
+```
+```{r}
+#3.  Create 2 interactive bar plots with titles, appropriate captions and legend:
+#
+#    3.1 Arrests for political content
+#
+#    3.2 Government shutdown capacity
+
+fig <- plot_ly(New_vdem, x = ~country_name, y = ~v2smarrest, type = 'bar', name = 'Arrests for political content',
+             marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5)))
+
+
+fig <- fig %>% add_trace(x = ~country_name, y = ~v2smgovshutcap, type = 'bar', name = 'Government shutdown capacity',
+           marker = list(color = 'rgb(58,200,225)',
+                          line = list(color = 'rgb(8,48,107)', width = 1.5)))
+fig <- fig %>% layout(title = "Some very sad stat",
+         xaxis = list(title = ""),
+         yaxis = list(title = ""))
+
+fig
+```
+
+
+
+```{r}
+#4.  Create an interactive scatterplot for showing the relationship between the government censorship effort #in the media field (`v2mecenefm`) and control of corruption (`e_wbgi_cce`)
+#
+#    4.1 Create the plot's skeleton
+#
+#    4.2. Add colored categorization on political regime (`v2x_regime`)
+
+vdem = vdem %>% mutate(
+regime = case_when(
+v2x_regime == 0 ~ "Closed autocracy",
+v2x_regime == 1 ~ "Electoral autocracy",
+v2x_regime == 2 ~ "Electoral democracy",
+v2x_regime == 3 ~ "Liberal democracy"
+)) 
+
+c <- plot_ly(data = vdem, x = ~v2mecenefm, y= ~e_wbgi_cce, color = ~regime,  type = "scatter") %>% 
+  layout(title = "The relationship between the government censorship effort in the media field and control of corruption in different regime types", xaxis = list(title = 'Cencorship effort'), 
+         yaxis = list(title = 'Control of Corruption'), legend = list(title=list(text='Regime type')))
+c
+```
+    
+    
