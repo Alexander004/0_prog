@@ -25,7 +25,7 @@ summary(model_1)
 ```{r}
 plot(model_1)
 ```
-We can see that SPB and Moscow are outliners, we should get rid of them
+We can see that SPB and Moscow are outliers, we should get rid of them
 
 ```{r}
 repression_1 <- repression[-c(157, 158), ]
@@ -49,19 +49,70 @@ margins.model <- cplot(model_4, dx = "protest_frequency", x = "regional_capital"
 ggplot(data = margins.model, aes(x = xvals, y = yvals)) + 
   geom_line(color = "red") + 
   geom_ribbon(alpha = .2, aes(ymin = lower, ymax = upper)) + 
-  geom_hline(yintercept = 0, linetype = "dashed") 
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  labs(title = "Marginal Effect of Democracy Index on UR Share 2011 as a Function of Share of urban populaiton in the region",
+       subtitle = "Marginal Effect of Democracy Index Across Range of Share of urban populaiton in the region",
+       y = "Estimated Effect of DI on UR % (BetaX)",
+       x = "Share of urban populaiton in the region", 
+       colour = "") +
+  theme_bw()
 ```
 ```{r}
-model_money <- lm(log(repression+1) ~ city_grp, data = repression_1)
+model_money <- lm(repression ~ city_grp, data = repression_1)
 summary(model_money)
-ggplot(repression_1, aes (x=city_grp, y=log(repression+1))) + 
+plot(model_money)
+ggplot(repression_1, aes (x=city_grp, y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+ggplot(repression_1, aes (x=log(city_grp+1), y=log(repression+1))) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+
+```{r}
+model_freq <- lm(log(repression+1) ~ log(protest_frequency+1), data = repression_1)
+summary(model_freq)
+plot(model_freq)
+ggplot(repression_1, aes (x=log(protest_frequency+1), y=log(repression+1))) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+ggplot(repression_1, aes (x=protest_frequency, y=repression)) + 
  geom_point(alpha=0.5) +
  stat_smooth(method="lm") 
 ```
 ```{r}
-ggplot(repression_1, aes (x=log(protest_frequency+1), y=repression)) + 
+model_salary <- lm(log(repression+1) ~ log(salary+1), data = repression_1)
+summary(model_salary)
+plot(model_salary)
+
+ggplot(repression_1, aes (x=log(salary+1), y=log(repression+1))) + 
  geom_point(alpha=0.5) +
  stat_smooth(method="lm") 
+```
+```{r}
+repression_2 <- na.omit(repression_1)
+
+model_opposition_share <- lm(log(repression+1) ~ opposition_share, data = repression_2)
+summary(model_opposition_share)
+plot(model_opposition_share)
+ggplot(repression_1, aes (x=opposition_share, y=log(repression+1))) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+```{r}
+model_6 <- lm(repression ~ city_grp + protest_frequency, data = repression_1)
+summary(model_6)
+
+
+model_5 <- lm(repression ~ city_grp + log(protest_frequency+1), data = repression_1)
+summary(model_5)
+plot(model_5)
+```
+```{r}
+check <- repression_1 %>% select(repression, city_grp, protest_frequency)
+
+mat <- cor(check, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
 ```
 
 

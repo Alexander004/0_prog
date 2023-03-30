@@ -1,0 +1,65 @@
+---
+title: "project_nastya"
+output: html_document
+date: "2023-03-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+regional_data <- read_csv2("~/0_programming/0_HSE_study/нис/project_nastya/Data/regional_data.csv")
+regional_data
+```
+
+```{r}
+model <- lm(turnout_2016 ~ democracy_index + internet, data = regional_data)
+summary(model)
+plot(model)
+```
+```{r}
+library(ggplot2)
+ggplot(regional_data, aes(x = democracy_index, y = turnout_2016)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_bw()
+```
+```{r}
+ggplot(regional_data, aes(x = internet^2, y = turnout_2016)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_bw()
+```
+```{r}
+check <- regional_data %>% select(turnout_2016, democracy_index, internet)
+library(corrplot)
+mat <- cor(check, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
+```
+```{r}
+ggplot(regional_data, aes(x = reg_alcbeer, y = turnout_2016)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_bw()
+```
+```{r}
+ggplot(regional_data, aes(x = reg_alcvodka, y = turnout_2016)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_bw()
+```
+
+```{r}
+model <- lm(turnout_2016 ~ reg_alcbeer + reg_alcvodka, data = regional_data)
+summary(model)
+plot(model)
+```
+```{r}
+check <- regional_data %>% select(turnout_2016, reg_alcbeer, reg_alcvodka)
+library(corrplot)
+mat <- cor(check, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
+```
+

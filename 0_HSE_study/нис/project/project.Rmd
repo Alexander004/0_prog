@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(readxl)
-dataset_elections_2018 <- read_excel("~/0_HSE_study/нис/project/Data/local-elections-summary-2018.xls")
+dataset_elections_2018 <- read_excel("~/0_programming/0_HSE_study/нис/project/Data/local-elections-summary-2018.xls")
 dataset_elections_2018
 ```
 ```{r}
@@ -26,7 +26,7 @@ Created a dataset for independent variables.
 library(readr)
 ```
 ```{r}
-energy_efficiency <- read_csv("~/0_HSE_study/нис/project/Data/data-Trlc4.csv")
+energy_efficiency <- read_csv("~/0_programming/0_HSE_study/нис/project/Data/data-Trlc4.csv")
 energy_efficiency
 ```
 ```{r}

@@ -1,0 +1,74 @@
+---
+title: "project_2"
+output: html_document
+date: "2023-03-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+repression <- read_delim("~/0_programming/0_HSE_study/нис/project_polina/Data/repression.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+repression
+```
+```{r}
+ggplot(repression_1, aes (x=protest_frequency, y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+```{r}
+ggplot(repression_1, aes (x=log(protest_frequency+1), y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+We can see linearity
+
+```{r}
+model_freq <- lm(repression ~ protest_frequency, data = repression)
+summary(model_freq)
+plot(model_freq)
+```
+157 and 158 - Moscow and Spb are out of Cook's distance -> let's delete them
+
+```{r}
+repression_1 <- repression[-c(157, 158), ]
+repression_1
+```
+
+```{r}
+model <- lm(repression ~ city_grp + log(protest_frequency+1), data = repression_1)
+summary(model)
+plot(model)
+```
+significant, cool. let's check for multicolleniarity
+```{r}
+check <- repression_1 %>% select(repression, city_grp, protest_frequency)
+
+mat <- cor(check, use = "complete.obs")
+corrplot(mat, method = "number", type = "lower", order = "FPC")
+```
+not that bad, but not very good -> `city_grp` and `protest_frequency` correlate
+```{r}
+model_freq1 <- lm(repression ~ log(protest_frequency+1), data = repression_1)
+summary(model_freq1)
+plot(model_freq1)
+```
+```{r}
+ggplot(repression_1, aes (x=log(protest_frequency+1), y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+```{r}
+model_grp <- lm(repression ~ city_grp, data = repression_1)
+summary(model_grp)
+plot(model_grp)
+```
+```{r}
+ggplot(repression_1, aes (x=city_grp, y=repression)) + 
+ geom_point(alpha=0.5) +
+ stat_smooth(method="lm") 
+```
+
