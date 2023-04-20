@@ -81,7 +81,7 @@ my_df
 7. Order `murders` dataset as well **from least populous to most populous**
 
 ```{r}
-murders <- murders[ind, ]
+murders <- murders[ind,]
 murders
 ```
 

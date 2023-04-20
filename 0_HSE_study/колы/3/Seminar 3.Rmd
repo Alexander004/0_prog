@@ -30,7 +30,7 @@ abline(v = 0.008839, col="red", lwd=2, lty=2)# v=value, col=color, lwd=line widt
 #### Task 2. Boxplots
 
 ```{r}
-Karelia <- read.csv("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/Karelia2016.csv", sep=';')
+Karelia <- read.csv("Data/Karelia2016.csv", sep=';')
 
 attach(Karelia)
 
@@ -60,7 +60,7 @@ detach(Karelia)
 library(ggplot2)
 library(ggthemes)
 
-elections <- read.csv("C:/Users/Alex/OneDrive/Документы/0_HSE_study/колы/3/Data/French_Presidential_Election_2017.csv", sep = ";")
+elections <- read.csv("Data/French_Presidential_Election_2017.csv", sep = ";")
 ```
 
 ### Task 1. Histogram

@@ -63,6 +63,7 @@ murders$abb[1:6]
 ```{r}
 ind <- order(murders$total)
 murders$abb[ind]
+murders$state[ind]
 ```
 `max` and `which.max`
 If we are only interested in the entry with the largest value, we can use max for the value:
@@ -73,8 +74,9 @@ max(murders$total)
 and `which.max` for the index of the largest value:
 
 ```{r}
-i_max <- which.max(murders$total)
-murders$state[i_max]
+which.max(murders$total)
+
+murders$state[which.max(murders$total)]
 ```
 For the minimum, we can use `min` and `which.min` in the same way.
 
@@ -94,6 +96,12 @@ df$order <- order(df$original)
 df$rank <- rank(df$original)
 df
 ```
+```{r}
+a <- c(4, 6, 7, 56)
+
+sort(a, decreasing = TRUE)
+```
+
 Common mistakes ("recycling"):
 
 ```{r}
