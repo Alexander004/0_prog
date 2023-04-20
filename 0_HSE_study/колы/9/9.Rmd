@@ -1,0 +1,293 @@
+---
+title: "Seminar 9"
+author: "Aleksei Sorbale"
+date: "2023-04-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1. Regression output with `stargazer` package
+
+Calculate the percentage of invalid ballots (`Invalid`), the percentage of voters who voted outside the polling stations (`Home_voting`) and the percentage of absentees (`Absentee_voting`)
+
+```{r}
+
+library(readr)
+
+President2018<-read_delim ("Data/Presidential_elections_2018.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Number_of_voters = col_number(), 
+        Absentee_Ballots = col_number(), 
+        Station_Ballots = col_number(), Home_Ballots = col_number(), 
+        Home_Box_Ballots = col_number(), 
+        Station_Box_Ballots = col_number(), 
+        Invalid_votes = col_number(), Valid_votes = col_number(), 
+        Baburin_votes = col_number(), Baburin_percent = col_number(), 
+        Grudinin_votes = col_number(), Grudinin_percent = col_number(), 
+        Zhirinovskii_votes = col_number(), 
+        Zhirinovskii_percent = col_number(), 
+        Putin_votes = col_number(), Putin_percent = col_number(), 
+        Sobchak_votes = col_number(), Sobchak_percent = col_number(), 
+        Suraikin_votes = col_number(), Suraikin_percent = col_number(), 
+        Titov_votes = col_number(), Titov_percent = col_number(), 
+        Yavlinskii_votes = col_number(), 
+        Yavlinskii_percent = col_number()), 
+    trim_ws = TRUE)
+
+attach(President2018)
+
+```
+
+```{r}
+
+Invalid<-Invalid_votes/(Invalid_votes+Valid_votes)
+Home_voting<-Home_Ballots/(Absentee_Ballots + Home_Ballots + Station_Ballots)
+Absentee_voting<-Absentee_Ballots/(Absentee_Ballots + Home_Ballots + Station_Ballots)
+
+President2018_new<-cbind(President2018, Invalid, Home_voting, Absentee_voting)
+attach(President2018_new)
+```
+
+Run four multiple linear regressions
+
+```{r}
+
+regr_Putin<-lm(Putin_percent~Invalid+Home_voting+Absentee_voting)
+summary(regr_Putin)
+
+regr_Grudinin<-lm(Grudinin_percent~Invalid+Home_voting+Absentee_voting)
+summary(regr_Grudinin)
+
+regr_Zhirinovskii<-lm(Zhirinovskii_percent~Invalid+Home_voting+Absentee_voting)
+summary(regr_Zhirinovskii)
+
+regr_Sobchak<-lm(Sobchak_percent~Invalid+Home_voting+Absentee_voting)
+summary(regr_Sobchak)
+```
+
+Use `stargazer` \-- a package to create smart and informative tables with regression outputs
+
+```{r}
+
+library(stargazer)
+
+stargazer(regr_Putin, regr_Grudinin, regr_Zhirinovskii, regr_Sobchak, 
+          type="html",
+          model.numbers = FALSE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("Putin","Grudinin", "Zhirinovskii", "Sobchak"), 
+          covariate.labels=c("Invalid ballots","Home voting","Absentee voting"),
+          omit.stat = c("ser", "f"),
+          out="Elections-2018.html") # ser = std.error, f= F-statistic
+
+```
+
+```{r}
+
+?stargazer # More information about the function
+
+getwd() # Look where the file with the table was saved
+```
+
+## Task 2. Use `stargazer` for descriptive statistics
+
+```{r}
+
+descriptive_statistics<-data.frame(Invalid, Home_voting, Absentee_voting, Putin_percent)
+
+stargazer(descriptive_statistics, type="html",
+          title="Descriptive statistics", 
+          digits=2, 
+          summary.stat=c("n", "mean", "sd", "min", "max","median"),
+          out="table_descriptive_statistics.html",
+          covariate.labels=c("Invalid Ballots","Home Voting", "Absentee Voting","Putin's Result"))
+```
+
+## Task 3. Visualize multiple OLS regression
+
+```{r}
+
+library(ggplot2)
+
+a<-ggplot(President2018_new) + 
+  aes(x=Invalid, y=Putin_percent) +
+  geom_point() +
+  ylab("Percentage of votes for Putin")+
+  xlab("Invalid votes (percentage)")+
+  ggtitle("")+
+  stat_smooth(method = "lm", se = T, col="red")
+  theme_bw()
+
+b<-ggplot(President2018_new) + 
+  aes(x=Home_voting, y=Putin_percent) +
+  geom_point() +
+  ylab("Percentage of votes for Putin")+
+  xlab("Home voting (percentage)")+
+  ggtitle("")+
+  stat_smooth(method = "lm", se = T, col="red")
+theme_bw()
+  
+c<-ggplot(President2018_new) + 
+  aes(x=Absentee_voting, y=Putin_percent) +
+  geom_point() +
+  ylab("Percentage of votes for Putin")+
+  xlab("Absentees (percentage)")+
+  ggtitle("")+
+  stat_smooth(method = "lm", se = T, col="red")
+theme_bw()  
+  
+library(cowplot)  
+plot_grid(a,b,c, labels = c('A', 'B', 'C'), label_size = 12, nrow = 1)
+```
+
+## Task 4. Supplementary statistics
+
+#### Calculate the standardized beta coefficients
+
+```{r}
+
+library(lm.beta)
+lm.beta(regr_Zhirinovskii)
+
+lm.beta(regr_Putin)
+```
+
+#### Calculate the confidence intervals for beta coefficients 
+
+```{r}
+
+confint(regr_Putin)
+
+confint(regr_Putin, level=0.99)
+confint(regr_Zhirinovskii, level=0.999)
+confint(regr_Sobchak, level=0.90)
+confint(regr_Sobchak, level=1.0)
+```
+
+#### Represent the CIs in the regression output using the `stargazer` package
+
+```{r}
+
+stargazer(regr_Putin, regr_Grudinin, regr_Zhirinovskii, regr_Sobchak, 
+          type="html",
+          model.numbers = FALSE,
+          ci = TRUE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("Putin","Grudinin", "Zhirinovskii", "Sobchak"), 
+          covariate.labels=c("Invalid ballots","Home voting","Absentee voting"),
+          omit.stat = c("ser", "f"),
+          out="Elections-2018_CI.html") 
+```
+
+## Practice. Federal parliamentary elections-2016
+
+1\. Import the dataset `ENPG2016.csv`
+
+```{r}
+
+df = read_delim("Data/ENPG2016.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Turnout = col_number(), 
+        ER = col_number(), KPRF = col_number(), 
+        LDPR = col_number(), SR = col_number(), 
+        KR = col_number(), Yabloko = col_number(), 
+        RPPS = col_number(), Rodina = col_number(), 
+        PR = col_number(), Zelenye = col_number(), 
+        PNS = col_number(), 
+        GP = col_number(), GS = col_number()), 
+    trim_ws = TRUE)
+
+attach(df)
+```
+
+2\. Create a variable summarizing the results of small parties: `Yabloko`, `RPPS`, `Rodina`, `Zelenye`, `PNS`, `GP`, and `GS`. Add this variable to the dataset.
+
+3\. Transform all the variables (except for `Region`) to percentages (divide them by 100)
+
+4\. Build 5 multiple OLS models:
+
+1.  DV = `ER`, IVs = `Turnout`, `PR` (percent of protest (invalid) votes)
+
+2.  DV = `KPRF`, IVs = `Turnout`, `PR` (percent of protest (invalid) votes)
+
+3.  DV = `LDPR`, IVs = `Turnout`, `PR` (percent of protest (invalid) votes)
+
+4.  DV = `SR`, IVs = `Turnout`, `PR` (percent of protest (invalid) votes)
+
+5.  DV = `Small parties` (your name), IVs = `Turnout`, `PR` (percent of protest (invalid) votes)
+
+5\. Use the `stargazer` package to get a regression table for all five models. Include **confidence intervals** for beta coefficients into the table. Do not include **F-statistic** and **standard errors** in the table
+
+6\. Calculate standardized beta coefficients in the first model (DV: `ER`)
+
+7\. Build a graph unifying 5 scatterplots showing the dependence of the results of all the parties (including the sum for small parties) on turnout. All scatterplots should have regression trends of any color
+
+```{r}
+# Load required packages
+library(dplyr)
+library(stargazer)
+
+# Create a variable summarizing the results of small parties
+small_parties <- c("Yabloko", "RPPS", "Rodina", "Zelenye", "PNS", "GP", "GS")
+df <- df %>%
+  mutate(`Small parties` = rowSums(select(., all_of(small_parties))))
+
+# Transform variables to percentages
+df[, -1] <- df[, -1]/100
+
+# Model 1: DV = ER
+model1 <- lm(ER ~ Turnout + PR, data = df)
+beta1 <- round(coef(model1)[-1], 3)
+
+# Model 2: DV = KPRF
+model2 <- lm(KPRF ~ Turnout + PR, data = df)
+beta2 <- round(coef(model2)[-1], 3)
+
+# Model 3: DV = LDPR
+model3 <- lm(LDPR ~ Turnout + PR, data = df)
+beta3 <- round(coef(model3)[-1], 3)
+
+# Model 4: DV = SR
+model4 <- lm(SR ~ Turnout + PR, data = df)
+beta4 <- round(coef(model4)[-1], 3)
+
+# Model 5: DV = Small parties
+model5 <- lm(`Small parties` ~ Turnout + PR, data = df)
+beta5 <- round(coef(model5)[-1], 3)
+
+# Calculate standardized beta coefficients for model 1
+summary(model1)$coefficients[, "Std. Error"]
+std_beta1 <- round(coef(model1)[-1] / summary(model1)$coefficients[, "Std. Error"], 3)
+
+
+
+```
+```{r}
+
+
+stargazer(model1, model2, model3, model4, model5, 
+          type="html",
+          model.numbers = FALSE,
+          ci = TRUE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("ER", "KPRF", "LDPR", "SR", "Small Parties"),
+          covariate.labels=c("Turnout", "PR"),
+          omit.stat = c("ser", "f"),
+          out="Elections-2018_CI.html") 
+
+```
+
+```{r}
+# Create scatterplot with regression trends
+library(ggplot2)
+library(tidyr)
+df_long <- df %>% 
+  select(-Region) %>% 
+  pivot_longer(cols = -c(Turnout, PR), names_to = "Party", values_to = "Result")
+ggplot(df_long, aes(x = Turnout, y = Result, color = Party)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F) +
+  labs(title = "Results of All Parties vs Turnout", x = "Turnout", y = "Results")
+```
+
