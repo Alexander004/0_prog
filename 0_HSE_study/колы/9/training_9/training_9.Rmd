@@ -1,0 +1,312 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-17"
+---
+
+### Part 1 - Dataset
+
+```{r}
+library(readr)
+Presidential_elections_2018 <- read_delim("D:/Users/Саня/Documents/0_prog/0_HSE_study/колы/9/training_9/Data/Presidential_elections_2018.csv", 
+    delim = ";", escape_double = FALSE, col_types = cols(Number_of_voters = col_number(), 
+        Absentee_Ballots = col_number(), 
+        Station_Ballots = col_number(), Home_Ballots = col_number(), 
+        Home_Box_Ballots = col_number(), 
+        Station_Box_Ballots = col_number(), 
+        Invalid_votes = col_number(), Valid_votes = col_number(), 
+        Baburin_votes = col_number(), Grudinin_votes = col_number(), 
+        Zhirinovskii_votes = col_number(), 
+        Putin_votes = col_number(), Sobchak_votes = col_number(), 
+        Suraikin_votes = col_number(), Titov_votes = col_number(), 
+        Yavlinskii_votes = col_number()), 
+    trim_ws = TRUE)
+Presidential_elections_2018
+attach(Presidential_elections_2018)
+```
+# 1.1 - Calculating turnout
+
+```{r}
+Presidential_elections_2018$Turnout = (Absentee_Ballots + Station_Ballots + Home_Ballots)/Number_of_voters
+Presidential_elections_2018
+```
+# 1.2 - Calculating percent of invalid and home votes
+
+```{r}
+Presidential_elections_2018$Invalid_percent = Invalid_votes/(Invalid_votes+Valid_votes)
+Presidential_elections_2018$Home_voting_percent = Home_Ballots/(Absentee_Ballots + Home_Ballots + Station_Ballots)
+Presidential_elections_2018
+```
+# 1.3 - Calculating united share of smaller candidates
+
+```{r}
+Presidential_elections_2018$Small_votes = Baburin_percent + Suraikin_percent + Titov_percent + Yavlinskii_percent
+Presidential_elections_2018
+```
+
+# 1.4 - Deleting variables
+
+```{r}
+library(dplyr)
+Presidential_elections_2018 <- Presidential_elections_2018 %>% select(-'Number_of_voters', -'Absentee_Ballots', -'Station_Ballots', -'Home_Ballots', -'Home_Box_Ballots', -'Station_Box_Ballots', -'Invalid_votes', -'Valid_votes', -'Baburin_votes', -'Grudinin_votes', -'Zhirinovskii_votes', -'Putin_votes', -'Sobchak_votes', -'Suraikin_votes', -'Titov_votes', -'Yavlinskii_votes')
+Presidential_elections_2018
+```
+# 1.5 - Rounding
+```{r}
+Presidential_elections_2018[,-1]<-round(Presidential_elections_2018[,-1], digits=3)
+Presidential_elections_2018
+attach(Presidential_elections_2018)
+```
+```{r}
+a <- c("a")
+```
+
+
+#### Part 2
+
+```{r}
+library(ggplot2)
+ggplot() + geom_boxplot(aes(x='Putin percent', y=Putin_percent), fill="purple", color = 'black') + 
+           geom_boxplot(aes(x='Grudinin percent', y=Grudinin_percent), fill="tomato4", color = 'black') + 
+           geom_boxplot(aes(x='Zhirinovskii percent', y=Zhirinovskii_percent), fill="yellow4", color = 'black') + 
+           geom_boxplot(aes(x='Sobchak percent', y=Sobchak_percent), fill="blue3", color = 'black') + 
+           geom_boxplot(aes(x='Others', y=Small_votes), fill="gray", color = 'black') + 
+           labs (title = "2018 Russian presidential elections", x="Candidate", y="Result") +
+           theme_bw()
+```
+
+#### Part 3
+
+```{r}
+#install.packages("lm.beta")
+
+library(lm.beta)
+```
+
+
+```{r}
+model_putin <- lm(Presidential_elections_2018$Putin_percent~Presidential_elections_2018$Turnout+Presidential_elections_2018$Invalid_percent+Presidential_elections_2018$Home_voting_percent)
+summary(model_putin)
+lm.beta(model_putin)
+```
+Standardized Coefficients::
+        (Intercept)             Turnout     Invalid_percent Home_voting_percent 
+                 NA          0.52967860         -0.37233028          0.02799112 
+                 
+### Interpritation of Putin model
+
+`Turnout` and `Invalid_percent` variables are statistically significant at the highest level of confidence (more than 99,99% in both cases)
+The overall model is also statistically significant with the p-value in F-statistic at the level of < 2.2e-16
+The Adjusted R-squared signals that the model describes 65,81% of cases 
+
+The `Turnout` poses a positive relation with the dependent variable. Every 1% increase in `Turnout` is associated with an average increase of 0,38% of `Putin_percent` all things being equal
+
+The `Invalid_percent` poses a negative relation with the dependent variable. Every 1% increase in `Invalid_percent` is associated with an average decrease of 8% of `Putin_percent` all things being equal
+
+`Home_voting_percent` is not statistically significant
+
+`Turnout` is the major predictor in this model with the highest effect (module) among Standardized Coefficients
+
+
+```{r}
+model_grudinin <- lm(Grudinin_percent~Turnout+Invalid_percent+Home_voting_percent)
+summary(model_grudinin)
+lm.beta(model_grudinin)
+```
+Standardized Coefficients::
+        (Intercept)             Turnout     Invalid_percent Home_voting_percent 
+                 NA       -0.3934527525        0.2973080060       -0.0004587144 
+                 
+                 
+### Interpritation of Grudinin model
+
+`Turnout` and `Invalid_percent` variables are statistically significant at the different levels of confidence (at 99,99% and 99%)
+The overall model is also statistically significant with the p-value in F-statistic at the level of 7.94e-09
+The Adjusted R-squared signals that the model describes 37% of cases 
+
+The `Turnout` poses a negative relation with the dependent variable. Every 1% increase in `Turnout` is associated with an average decrease of 0,19% of `Grudinin_percent` all things being equal
+
+The `Invalid_percent` poses a positive relation with the dependent variable. Every 1% increase in `Invalid_percent` is associated with an average increase of 4,36% of `Grudinin_percent` all things being equal
+
+`Home_voting_percent` is not statistically significant
+
+`Turnout` is the major predictor in this model with the highest effect (module) among Standardized Coefficients
+
+```{r}
+model_zhirinovskii <- lm(Zhirinovskii_percent~Turnout+Invalid_percent+Home_voting_percent)
+summary(model_zhirinovskii)
+lm.beta(model_zhirinovskii)
+```
+Standardized Coefficients::
+        (Intercept)             Turnout     Invalid_percent Home_voting_percent 
+                 NA         -0.47039281          0.30362788          0.05206615 
+                 
+### Interpritation of Zhirinovskii model
+
+`Turnout` and `Invalid_percent` variables are statistically significant at the different levels of confidence (at more than 99,99% and 99,994%)
+The overall model is also statistically significant with the p-value in F-statistic at the level of 3.1e-12
+The Adjusted R-squared signals that the model describes 48,24% of cases 
+
+The `Turnout` poses a negative relation with the dependent variable. Every 1% increase in `Turnout` is associated with an average decrease of 0,11% of `Zhirinovskii_percent` all things being equal
+
+The `Invalid_percent` poses a positive relation with the dependent variable. Every 1% increase in `Invalid_percent` is associated with an average increase of 2,22% of `Zhirinovskii_percent` all things being equal
+
+`Home_voting_percent` is not statistically significant
+
+`Turnout` is the major predictor in this model with the highest effect (module) among Standardized Coefficients
+
+```{r}
+model_sobchak <- lm(Sobchak_percent~Turnout+Invalid_percent+Home_voting_percent)
+summary(model_sobchak)
+lm.beta(model_sobchak)
+```
+Standardized Coefficients::
+        (Intercept)             Turnout     Invalid_percent Home_voting_percent 
+                 NA          -0.4047409           0.2391258          -0.2121655 
+                 
+### Interpritation of Sobchak model
+
+
+`Turnout` and `Invalid_percent` and `Home_voting_percent` variables are statistically significant at the different levels of confidence (at more than 99,99% and 99,54% and 99,775%)
+The overall model is also statistically significant with the p-value in F-statistic at the level of 1.809e-08
+The Adjusted R-squared signals that the model describes 35,68% of cases 
+
+The `Turnout` poses a negative relation with the dependent variable. Every 1% increase in `Turnout` is associated with an average decrease of 0,02% of `Sobchak_percent` all things being equal
+
+The `Invalid_percent` poses a positive relation with the dependent variable. Every 1% increase in `Invalid_percent` is associated with an average increase of 0,51% of `Sobchak_percent` all things being equal
+
+The `Home_voting_percent` poses a negative relation with the dependent variable. Every 1% increase in `Home_voting_percent` is associated with an average decrease of 0,04% of `Sobchak_percent` all things being equal
+
+`Turnout` is the major predictor in this model with the highest effect (module) among Standardized Coefficients
+
+##### Part 4
+
+```{r}
+p_t <- ggplot(data = Presidential_elections_2018, aes(x = `Turnout`, y = `Putin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Turnout") +
+  ylab("Putin percent") +
+  ggtitle("Turnout and Putin electoral results")
+p_t
+```
+```{r}
+p_i <- ggplot(data = Presidential_elections_2018, aes(x = `Invalid_percent`, y = `Putin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Invalid percent") +
+  ylab("Putin percent") +
+  ggtitle("Invalid percent and Putin electoral results")
+p_i
+```
+
+```{r}
+p_h <- ggplot(data = Presidential_elections_2018, aes(x = `Home_voting_percent`, y = `Putin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  xlab("Home voting percent") +
+  ylab("Putin percent") +
+  ggtitle("Home voting and Putin electoral results")
+p_h
+```
+```{r}
+g_t <- ggplot(data = Presidential_elections_2018, aes(x = `Turnout`, y = `Grudinin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = 'red') +
+  xlab("Turnout") +
+  ylab("Grudinin percent") +
+  ggtitle("Turnout and Grudinin electoral results")
+g_t
+```
+
+```{r}
+g_i <- ggplot(data = Presidential_elections_2018, aes(x = `Invalid_percent`, y = `Grudinin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = 'red') +
+  xlab("Invalid percent") +
+  ylab("Grudinin percent") +
+  ggtitle("Invalid percent and Grudinin electoral results")
+g_i
+```
+
+```{r}
+g_h <- ggplot(data = Presidential_elections_2018, aes(x = `Home_voting_percent`, y = `Grudinin_percent`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = 'red') +
+  xlab("Home voting percent") +
+  ylab("Grudinin percent") +
+  ggtitle("Home voting and Grudinin electoral results")
+g_h
+```
+
+```{r}
+#install.packages("cowplot")
+library(cowplot)  
+putin_graph <- plot_grid(p_t,p_i,p_h,label_size = 12, nrow = 1)
+putin_graph
+```
+```{r}
+grudinin_graph <- plot_grid(g_t,g_i,g_h,label_size = 12, nrow = 1)
+grudinin_graph
+```
+##### Part 5
+```{r}
+#install.packages('stargazer')
+library(stargazer)
+```
+
+```{r}
+stargazer(model_putin, model_grudinin, model_zhirinovskii, model_sobchak, 
+          type="html",
+          model.numbers = FALSE,
+          ci = TRUE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("Putin","Grudinin", "Zhirinovskii", "Sobchak"), 
+          covariate.labels=c("Turnout", "Invalid ballots","Home voting"),
+          omit.stat = c("ser", "f"),
+          out="Elections-2018_CI.html") 
+```
+
+```{r}
+descriptive_statistics_pu<- data.frame(Turnout, Invalid_percent, Home_voting_percent, Putin_percent)
+
+stargazer(descriptive_statistics_pu, type="html",
+          title="Descriptive statistics", 
+          digits=3, 
+          summary.stat=c("sd", "min", "max","median"),
+          out="table_descriptive_statistics_pu.html",
+          covariate.labels=c("Turnout", "Invalid Ballots","Home Voting","Putin's Result"))
+```
+
+```{r}
+descriptive_statistics_gr<- data.frame(Turnout, Invalid_percent, Home_voting_percent, Grudinin_percent)
+
+stargazer(descriptive_statistics_gr, type="html",
+          title="Descriptive statistics", 
+          digits=3, 
+          summary.stat=c("sd", "min", "max","median"),
+          out="table_descriptive_statistics_gr.html",
+          covariate.labels=c("Turnout", "Invalid Ballots","Home Voting","Grudinin's Result"))
+```
+
+```{r}
+descriptive_statistics_zh<- data.frame(Turnout, Invalid_percent, Home_voting_percent, Zhirinovskii_percent)
+
+stargazer(descriptive_statistics_zh, type="html",
+          title="Descriptive statistics", 
+          digits=3, 
+          summary.stat=c("sd", "min", "max","median"),
+          out="table_descriptive_statistics_zh.html",
+          covariate.labels=c("Turnout", "Invalid Ballots","Home Voting","Zhirinovskii's Result"))
+```
+
+```{r}
+descriptive_statistics_sb<- data.frame(Turnout, Invalid_percent, Home_voting_percent, Sobchak_percent)
+
+stargazer(descriptive_statistics_sb, type="html",
+          title="Descriptive statistics", 
+          digits=3, 
+          summary.stat=c("sd", "min", "max","median"),
+          out="table_descriptive_statistics_sb.html",
+          covariate.labels=c("Turnout", "Invalid Ballots","Home Voting","Sobchaks's Result"))
+```

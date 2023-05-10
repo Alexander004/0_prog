@@ -1,0 +1,115 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-19"
+---
+```{r}
+library(igraph)
+
+graph <- list(s = c("a", "b"),
+              a = c("s", "b", "c", "d"),
+              b = c("s", "a", "c", "d"),
+              c = c("a", "b", "d", "e", "f"),
+              d = c("a", "b", "c", "e", "f"),
+              e = c("c", "d", "f", "z"),
+              f = c("c", "d", "e", "z"),
+              z = c("e", "f"))
+
+weights <- list(s = c(3, 5),
+                a = c(3, 1, 10, 11),
+                b = c(5, 3, 2, 3),
+                c = c(10, 2, 3, 7, 12),
+                d = c(15, 7, 2, 11, 2),
+                e = c(7, 11, 3, 2),
+                f = c(12, 2, 3, 2),
+                z = c(2, 2))
+```
+```{r}
+# create edgelist with weights
+G <- data.frame(stack(graph), weights = stack(weights)[[1]])
+set.seed(500)
+
+el <- as.matrix(stack(graph))
+g <- graph_from_edgelist(el)
+E(g)$weights <- G$weights
+
+plot(g, edge.label = G$weights)
+```
+```{r}
+a <- c("a","b")
+a[-1]
+a[-length(a)]
+
+pairs <- cbind(values = "a", ind = "b")
+pairs
+
+sum(merge(pairs, G)[, "weights"])
+
+?merge
+```
+
+
+```{r}
+path_length <- function(path) {
+  # if path is NULL return infinite length
+  if (is.null(path)) return(Inf)
+  
+  # get all consecutive nodes
+  pairs <- cbind(values = path[-length(path)], ind = path[-1])
+  # join with G and sum over weights
+  sum(merge(pairs, G)[ , "weights"])
+}
+```
+
+```{r}
+find_shortest_path <- function(graph, start, end, path = c()) {
+  # if there are no nodes linked from current node (= dead end) return NULL
+  if (is.null(graph[[start]])) return(NULL)
+  # add next node to path so far
+  path <- c(path, start)
+  
+  # base case of recursion: if end is reached return path
+  if (start == end) return(path)
+  
+  # initialize shortest path as NULL
+  shortest <- NULL.
+  # loop through all nodes linked from the current node (given in start)
+  for (node in graph[[start]]) {
+    # proceed only if linked node is not already in path
+    if (!(node %in% path)) {
+      # recursively call function for finding shortest path with node as start and assign it to newpath
+      newpath <- find_shortest_path(graph, node, end, path)
+      # if newpath is shorter than shortest so far assign newpath to shortest
+      if (path_length(newpath) < path_length(shortest))
+        shortest <- newpath
+    }
+  }
+  # return shortest path
+  shortest
+}
+```
+
+```{r}
+find_shortest_path(graph, "s", "z") # via b
+## [1] "s" "b" "c" "d" "f" "z"
+
+find_shortest_path(graph, "z", "s") # back via a
+## [1] "z" "f" "d" "b" "a" "s"
+
+path_length(find_shortest_path(graph, "z", "s"))
+```
+```{r}
+E(g)$weights
+```
+
+```{r}
+shortest.paths(g, "s", to = "z", algorithm = "dijkstra")
+shortest.paths(g, "z", to = "s",  weights = G$weights, algorithm = "dijkstra")
+```
+```{r}
+all_shortest_paths(g, "s", weights = G$weights)
+```
+```{r}
+?all_shortest_paths
+```
+
