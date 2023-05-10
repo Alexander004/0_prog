@@ -1,0 +1,189 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-25"
+---
+
+```{r}
+library(igraph)
+adjm <- matrix(c(0,10,0,0,0,11,0,0,0,
+                 10,0,18,0,0,0,12,12,0,
+                 0,18,0,22,0,0,0,8,0,
+                 0,0,22,0,20,0,24,21,16,
+                 0,0,0,20,0,26,0,0,7,
+                 11,0,0,0,26,0,17,0,0,
+                 0,12,0,24,0,17,0,0,19,
+                 0,12,8,21,0,0,0,0,0,
+                 0,0,0,16,7,0,19,0,0),nrow = 9)
+g2 <- graph_from_adjacency_matrix(adjm, weighted=TRUE, mode="undirected")
+
+plot(g2, edge.label = E(g2)$weight) #edge.width=E(g2)$weight #edge.width=edge.betweenness(g2)
+```
+
+```{r}
+V <- matrix(c(0, 10, Inf, Inf, Inf, 11, Inf, Inf, Inf,
+10, 0, 18, Inf, Inf, Inf, 12, 12, Inf,
+Inf, 18, 0, 22, Inf, Inf, Inf, 8, Inf,
+Inf, Inf, 22, 0, 20, Inf, 24, 21, 16,
+Inf, Inf, Inf, 20, 0, 26, Inf, Inf, 7,
+11, Inf, Inf, Inf, 26, 0, 17, Inf, Inf,
+Inf, 12, Inf, 24, Inf, 17, 0, Inf, 19,
+Inf, 12, 8, 21, Inf, Inf, Inf, 0, Inf,
+Inf, Inf, Inf, 16, 7, Inf, 19, Inf, 0), nrow = 9, ncol = 9, byrow = TRUE)
+
+kruskal <- function(V) {
+A <- V
+m <- nrow(A)
+k <- 1:m # k is a vector to store the Connected Components
+F <- matrix(0, nrow = m - 1, ncol = 3)
+i <- 0
+
+while (i != m - 1) {
+min_edges <- apply(A, 1, min) # find the minimum edge start from each row (point)
+d <- which(min_edges == min(min_edges))[1] # find the end point index
+b <- which(A[d, ] == min_edges[d])[1]# find the start point index
+
+
+
+
+if (k[d] != k[b]) { # check if the two vertices (points) are in the same connected component
+i <- i + 1
+F[i, ] <- c(d, b, A[d, b]) # assign the minimum edge to result
+t <- k[b] # store the connected component
+k[b] <- k[d] # make the two points in the same connected component
+
+for (j in 1:m) { # search other points that should be updated in the new connected component
+if (k[j] == t) {
+k[j] <- k[d]
+}
+}
+
+
+}
+
+
+A[d, b] <- Inf; A[b, d] <- Inf # set the value to Inf
+}
+return(F)
+}
+
+kruskal(V)
+```
+
+```{r}
+V <- matrix(c(0, 10, Inf, Inf, Inf, 11, Inf, Inf, Inf,
+10, 0, 18, Inf, Inf, Inf, 12, 12, Inf,
+Inf, 18, 0, 22, Inf, Inf, Inf, 8, Inf,
+Inf, Inf, 22, 0, 20, Inf, 24, 21, 16,
+Inf, Inf, Inf, 20, 0, 26, Inf, Inf, 7,
+11, Inf, Inf, Inf, 26, 0, 17, Inf, Inf,
+Inf, 12, Inf, 24, Inf, 17, 0, Inf, 19,
+Inf, 12, 8, 21, Inf, Inf, Inf, 0, Inf,
+Inf, Inf, Inf, 16, 7, Inf, 19, Inf, 0), nrow = 9, ncol = 9, byrow = TRUE)
+
+kruskal <- function(V) {
+A <- V
+m <- nrow(A)
+k <- 1:m # k is a vector to store the Connected Components
+F <- matrix(0, nrow = m - 1, ncol = 3)
+i <- 0
+
+while (i != m - 1) {
+min_edges <- apply(A, 1, min) # find the minimum edge start from each row (point)
+d <- which(min_edges == min(min_edges))[1] # find the end point index
+b <- which(A[d, ] == min_edges[d])[1]# find the start point index
+
+
+
+
+if (k[d] != k[b]) { # check if the two vertices (points) are in the same connected component
+i <- i + 1
+F[i, ] <- c(d, b, A[d, b]) # assign the minimum edge to result
+t <- k[b] # store the connected component
+k[b] <- k[d] # make the two points in the same connected component
+
+
+
+}
+
+
+A[d, b] <- Inf; A[b, d] <- Inf # set the value to Inf
+}
+return(F)
+}
+
+kruskal(V)
+```
+
+```{r}
+library(igraph)
+adjm <- matrix(c(0,10,0,0,0,11,0,0,0,
+                 10,0,18,0,0,0,12,12,0,
+                 0,18,0,22,0,0,0,8,0,
+                 0,0,22,0,20,0,24,21,16,
+                 0,0,0,20,0,26,0,0,7,
+                 11,0,0,0,26,0,17,0,0,
+                 0,12,0,24,0,17,0,0,19,
+                 0,12,8,21,0,0,0,0,0,
+                 0,0,0,16,7,0,19,0,0),nrow = 9)
+
+
+g2 <- graph_from_adjacency_matrix(adjm, weighted=TRUE, mode="undirected")
+
+edgecolor=rep("gray",nrow(as.data.frame(get.edgelist(g2))))
+edgecolor[c(13,7,1,2,4,5,11,15)]="red"
+
+plot(g2, edge.label = E(g2)$weight,edge.color=edgecolor)
+```
+```{r}
+g_mst <- mst(g2)
+plot(g_mst)
+```
+```{r}
+?apply
+```
+
+```{r}
+V <- matrix(c(Inf, 10, Inf, Inf, Inf, 11, Inf, Inf, Inf,
+10, Inf, 18, Inf, Inf, Inf, 12, 12, Inf,
+Inf, 18, Inf, 22, Inf, Inf, Inf, 8, Inf,
+Inf, Inf, 22, Inf, 20, Inf, 24, 21, 16,
+Inf, Inf, Inf, 20, Inf, 26, Inf, Inf, 7,
+11, Inf, Inf, Inf, 26, Inf, 17, Inf, Inf,
+Inf, 12, Inf, 24, Inf, 17, Inf, Inf, 19,
+Inf, 12, 8, 21, Inf, Inf, Inf, Inf, Inf,
+Inf, Inf, Inf, 16, 7, Inf, 19, Inf, Inf), nrow = 9, ncol = 9, byrow = TRUE)
+min_edges <- apply(V, 1, min)
+min_edges
+
+```
+```{r}
+min(min_edges)
+```
+```{r}
+min_edges == min(min_edges)
+```
+
+
+```{r}
+d <- which(min_edges == min(min_edges))[1]
+d
+```
+```{r}
+b <- which(V[d, ] == min_edges[d])[1]
+b
+```
+```{r}
+min_edges[d]
+```
+```{r}
+V[d, ]
+```
+
+```{r}
+V[d, ] == min_edges[d]
+```
+
+
+
+

@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-23"
+---
+
+```{r}
+library(igraph)
+
+# Create a sample planar graph
+graph <- matrix(0, nrow=5, ncol=5)
+graph[1,2] <- graph[2,1] <- 1
+graph[1,3] <- graph[3,1] <- 1
+graph[2,3] <- graph[3,2] <- 1
+graph[2,4] <- graph[4,2] <- 1
+graph[3,5] <- graph[5,3] <- 1
+graph[4,5] <- graph[5,4] <- 1
+graph[4,3] <- graph[3,4] <- 1
+
+set.seed(300)
+g <- graph_from_adjacency_matrix(graph, mode = "undirected")
+plot(g)
+```
+
+### 1st step - delet nodes with k-1 degree (k - number of needed colors)
+
+```{r}
+# Function to find a node of degree less than k and delete it from the graph
+findAndDeleteNode <- function(adjMatrix, k) {
+  # Find a node of degree less than k
+  nodeToDelete <- which(rowSums(adjMatrix) < k)
+  
+  # Delete the node from the graph
+  adjMatrix[nodeToDelete, ] <- 0
+  adjMatrix[, nodeToDelete] <- 0
+  
+  # Return the deleted node and the updated adjacency matrix
+  #return(c(nodeToDelete, adjMatrix))
+  return(list(nodeToDelete,adjMatrix))
+}
+```
+
+
+```{r}
+new_matrix <- matrix(findAndDeleteNode(graph, 3)[[2]], nrow = 5, byrow = TRUE)
+g2 <- graph_from_adjacency_matrix(new_matrix, mode = "undirected")
+plot(g2)
+```
+Homework:
+
+*finish the algorithm
+```{r}
+findAndDeleteNode(mat, 3)
+```
+
+```{r}
+mat <- matrix(c(0, 8, 0, 0, 4, 0, 0, 10, 0, 0, 0, #A
+                0, 0, 7, 0, 4, 0, 0, 0, 0, 0, 0, #B
+                0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, #C
+                0, 0, 0, 0, 0, 11, 7, 0, 0, 0, 0, #D
+                0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, #E
+                0, 10, 7, 8, 0, 0, 0, 0, 0, 8, 5, #F
+                0, 0, 0, 12, 0, 4, 0, 0, 0, 0, 9, #G
+                0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, #H
+                0, 0, 0, 0, 0, 0, 0, 6, 0, 8, 0, #I
+                0, 0, 0, 0, 0, 8, 0, 0, 12, 0, 13, #J
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0), nrow = 11, byrow = TRUE) #K
+
+i <-  graph_from_adjacency_matrix(mat)
+a <- as_adjacency_matrix(i)
+a
+```
+

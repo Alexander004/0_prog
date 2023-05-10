@@ -1,0 +1,109 @@
+---
+title: "Seminar 10"
+author: "Aleksei Sorbale"
+date: "2023-04-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1. Paired regressions
+
+```{r}
+
+library(car)
+library(ggplot2)
+```
+```{r}
+library(readr)
+data <- read_delim("C:/Users/Alex/OneDrive/Документы/0_programming/0_prog/0_HSE_study/колы/10/Data/happiness.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+data
+attach(data)
+```
+
+
+```{r}
+
+mod1 <- lm(happy ~ GINI)
+summary(mod1)
+
+mod2 <- lm(happy ~ god_imp)
+summary(mod2)
+```
+
+## Task 2. Additive model and model with interaction effect
+
+```{r}
+
+mod.additive<-lm(happy ~ GINI + god_imp)
+summary(mod.additive)
+
+mod.interaction<-lm(happy ~ GINI*god_imp)#with "*" the interaction effect is set
+summary(mod.interaction)
+```
+
+## Task 3. Diagnostics of the model with interaction effect
+
+Determine which model is better in terms of explanation and prediction with `performance` package
+
+```{r}
+
+library(performance)
+compare_performance(mod1, mod.additive, mod.interaction)
+```
+
+Plot for interaction effect: `interplot`
+
+```{r}
+#install.packages("interplot")
+library(interplot)
+interplot(m = mod.interaction,
+           var1 = "GINI",
+           var2 = "god_imp",  hist = T) +
+  xlab("Religiosity") +
+  ylab("Marginal effect of inequality on the level of happiness") +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  geom_vline(xintercept = 0, linetype="dashed")
+```
+
+Determine the interval of values of the moderator (`god_imp`), for which the interaction is significant (**does exist**)
+
+```{r}
+#install.packages("interactions")
+library(interactions)
+options(width = 60)
+johnson_neyman(mod.interaction,
+               pred = "GINI",  modx = "god_imp",  alpha = 0.05)
+```
+
+## Practice. Reaction to the process of European integration
+
+1\. Import the dataset `ESS2016.csv`
+
+2\. Filter the dataset so that only the following variables remain: `euftf`, `imwbcnt`, `polintr`
+
+3\. Build the additive model: DV = `euftf`, IV1 = `imwbcnt`, IV2 = `polintr`
+
+4\. Build the model with the interaction effect: DV = `euftf`, IV (predictor) = `imwbcnt`, Z (moderator) = `polintr`
+
+5\. Compare the fit of additive model and interaction model
+
+6\. Build a plot of the interaction effect. Add captions to the plot's axes
+
+7\. Determine the interval of values of the moderator, for which the interaction is significant. Add a Johnson-Neyman plot for illustration
+
+**Codes**:\
+
+`euftf`: European unification go further or gone too far
+
+`imwbcnt`: Immigrants make country worse or better place to live
+
+`polintr`: How interested in politics the person is
+
+```{r}
+
+#ESS<-read.csv("C:/Users/User/.../ESS2016.csv", sep=";")
+```

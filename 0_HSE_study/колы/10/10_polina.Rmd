@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-25"
+---
+
+```{r}
+library(readr)
+ESS2017 <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/10/Data/ESS2017.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+ESS2017_filter <- ESS2017[,c("cntry","trstplt","stfdem", "polintr", "hinctnta")]
+
+RU <- ESS2017_filter[ESS2017_filter$cntry == "RU",]
+GB <- ESS2017_filter[ESS2017_filter$cntry == "GB",]
+
+GB1 <- GB[GB$trstplt <= 10 & GB$stfdem <= 10 & GB$hinctnta <= 10 & GB$trstplt > 0 & GB$stfdem > 0 & GB$hinctnta > 0,]
+RU1 <- RU[RU$trstplt <= 10 & RU$stfdem <= 10 & RU$hinctnta <= 10 & RU$trstplt > 0 & RU$stfdem > 0 & RU$hinctnta > 0,]
+```
+
+
+```{r}
+model1 <- lm(trstplt ~ stfdem, data = RU1)
+summary(model1)
+
+model2 <- lm(trstplt ~ polintr, data = RU1)
+summary(model2)
+
+model_plus1 <- lm(trstplt ~ stfdem + polintr, data = RU1)
+summary(model_plus1)
+
+model_plus2 <- lm(trstplt ~ stfdem + polintr + hinctnta, data = RU1)
+summary(model_plus2)
+
+model_umnozh1 <- lm(trstplt ~ stfdem*polintr, data = RU1)
+summary(model_umnozh1)
+```
+
+```{r}
+library(performance)
+compare_performance(model1, model_plus1, model_plus2, model_umnozh1)
+```
+
+Interactive model has the highest R2 (adj.) = 0.315 so it is the best model out of these.
+
+```{r}
+library(interplot)
+interplot(m = model_umnozh1,
+           var1 = "stfdem",
+           var2 = "polintr",  hist = T) +
+  xlab("Trust") +
+  ylab("Marginal effect of Satisfaction") +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  geom_vline(xintercept = 0, linetype="dashed")
+```
+The direction is negative. The bigger `polintr` the smaller the effect of `stfdem` is on `trstplt.`
+```{r}
+library(interactions)
+options(width = 60)
+johnson_neyman(model_umnozh1,
+               pred = "stfdem",  modx = "polintr",  alpha = 0.01)
+```
+a) The interval - [1 to 2.33]
+b) It is 1% as we defined in the model
+c) Blue - the place where effect is present and significant, red - not significant
+
+In Russia, the effect of citizens' satisfaction with the way democracy works on the level of citizens' trust to national politicians is becoming stronger under the increase of citizens' interest in politics. This interaction effect is statistically present only for citizens with high level of interest in politics.
+
+```{r}
+model1gb <- lm(trstplt ~ stfdem, data = GB1)
+summary(model1gb)
+
+model2gb <- lm(trstplt ~ polintr, data = GB1)
+summary(model2gb)
+
+model_plus1gb <- lm(trstplt ~ stfdem + polintr, data = GB1)
+summary(model_plus1gb)
+
+model_plus2gb <- lm(trstplt ~ stfdem + polintr + hinctnta, data = GB1)
+summary(model_plus2gb)
+
+model_umnozh1gb <- lm(trstplt ~ stfdem*polintr, data = GB1)
+summary(model_umnozh1gb)
+```
+
+```{r}
+compare_performance(model1gb, model_plus1gb, model_plus2gb, model_umnozh1gb)
+```
+Simple model (`model1gb`) has the highest R2 (adj.) = 0.193 so it is the best model out of these.
+
+```{r}
+interplot(m = model_umnozh1gb,
+           var1 = "stfdem",
+           var2 = "polintr",  hist = T) +
+  xlab("Trust") +
+  ylab("Marginal effect of Satisfaction") +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  geom_vline(xintercept = 0, linetype="dashed")
+```
+The direction is positive. The bigger `polintr` the bigger the effect of `stfdem` is on `trstplt.`
+
+```{r}
+options(width = 60)
+johnson_neyman(model_umnozh1gb,
+               pred = "stfdem",  modx = "polintr",  alpha = 0.001)
+```
+a) The interval - [2.31, 2.54]
+b) It is 0,1% as we defined in the model
+c) Blue - the place where effect is present and significant, red - not significant
+
+In the UK, the effect of citizens' satisfaction with the way democracy works on the level of citizens' trust to national politicians is becoming weaker under the increase of citizens' interest in politics. This interaction effect is statistically present only for citizens with medium level of interest in politics
