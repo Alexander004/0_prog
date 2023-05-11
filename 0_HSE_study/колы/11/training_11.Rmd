@@ -4,26 +4,112 @@ output: html_document
 date: "2023-05-10"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+1. Import the dataset Karelia2016.csv.
+
+```{r}
+library(readr)
+Karelia2016 <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/11/Data/Karelia2016.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+Karelia2016
+```
+2. Calculate the Turnout variable. 
+Tip 1: Turnout variable formula: (Com_Ballots + Home_Ballots)/Voters. 
+
+```{r}
+Karelia2016$Turnout <- (Karelia2016$Com_Ballots + Karelia2016$Home_Ballots)/Karelia2016$Voters
+Karelia2016
+```
+3. Calculate the percent of invalid ballots and percent of people, who voted at home (Invalid and Home_Ballots variables are needed here). 
+
+```{r}
+Karelia2016$Invalid_p <- Karelia2016$Invalid/Karelia2016$Voters
+Karelia2016$Home_Ballots_p <- Karelia2016$Home_Ballots/(Karelia2016$Com_Ballots + Karelia2016$Home_Ballots)
+Karelia2016
+```
+5. Filter the dataset so that only the following variables remain:
+
+• United_Russia: percent of votes for United Russia
+
+• Home_Ballots (or your name): percent of people, who voted at home
+
+• Invalid (or your name): percent of invalid ballots
+
+• Turnout: turnout on the elections in Karelia
+```{r}
+library(dplyr)
+
+Karelia <- dplyr::select(Karelia2016,United_Russia,Home_Ballots_p, Invalid_p, Turnout)
+Karelia
+```
+6. Round the values in all four variables to 3 decimal places (thousandth).
+```{r}
+Karelia <- round(Karelia, digits = 3)
+Karelia
+```
+7. Build the following OLS model: DV = United_Russia, IVs = Home_Ballots (or your name), Invalid (or your name), Turnout.
+```{r}
+model <- lm(United_Russia ~ Home_Ballots_p + Invalid_p + Turnout, data = Karelia)
+summary(model)
+```
+8. Check the model for outliers. Give a brief interpretation: are there any outliers in the model, if yes, where are they situated (which line(s))?
+
+```{r}
+library(car)
+outlierTest(model)
+
+### Outliers in the model - 100 (Bonferroni p < 0.05)
 ```
 
-## R Markdown
+9. Check the model for influential observations. Give a brief interpretation: are there any influential observations in the model, if yes, where are they situated (which line(s))? If the model contains influential observations, delete them and run the model without them!
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+plot(model, which = 4, cook.levels = 1)#"cook.levels = 1" - identify the default Cook's distance, "which" - number of plot in a series
+abline(h=1, lty=2, col="red")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+### No there are no influential observations (no observation crosses the cook distance)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+10. Check the model for heteroscedasticity.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+a. Build a spreadLevel plot;
+
+Interpret the plot outlook: which element(s) and their positioning can be used in order to make an assumption about the presence/absence of the problem?
+
+b. Run the test;
+
+c. Indicate whether the problem is present in the model. Explain, which values and/or sections of the test output drove you to the respective conclusion;
+
+d. If the problem does exist, fix it with the respective tool.
+
+```{r}
+spreadLevelPlot(model)
+
+# The blue dashed trendline is going up (**not being horizontal**) and pink reference line is varying (**not being flat**) so we can assume the problem of non-constant DV variance is present (aka heteroscedasticity)
+ncvTest(model)
+
+# p < 0.005 -> heteroscedasticity is present
+```
+```{r}
+library(sandwich)
+library(lmtest)
+model_fixed <- coeftest(model, vcovHC(model))
+model_fixed
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+11. Use the stargazer package to draw the table with regression output. Do not include F- statistic in the table. (for this task use the final version of the corrected model)
+
+```{r}
+library(stargazer)
+
+stargazer(model_fixed, 
+          type="html",
+          model.numbers = FALSE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("United Russia"), 
+          covariate.labels=c("Home voting","Invalid ballots","Turnout"),
+          omit.stat = c("f"),
+          out="Elections_Karelia.html") 
+```
+
