@@ -1,0 +1,193 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-05-16"
+---
+
+1. Import the dataset Karelia2016.csv.
+
+```{r}
+library(readr)
+Karelia2016 <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/12/Data/Karelia2016.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+Karelia2016
+```
+2. Calculate the Turnout variable. 
+Tip 1: Turnout variable formula: (Com_Ballots + Home_Ballots)/Voters. 
+
+```{r}
+Karelia2016$Turnout <- (Karelia2016$Com_Ballots + Karelia2016$Home_Ballots)/Karelia2016$Voters
+Karelia2016
+```
+3. Calculate the percent of invalid ballots and percent of people, who voted at home (Invalid and Home_Ballots variables are needed here). 
+
+```{r}
+Karelia2016$Invalid_p <- Karelia2016$Invalid/Karelia2016$Voters
+Karelia2016$Home_Ballots_p <- Karelia2016$Home_Ballots/(Karelia2016$Com_Ballots + Karelia2016$Home_Ballots)
+Karelia2016
+```
+5. Filter the dataset so that only the following variables remain:
+
+• United_Russia: percent of votes for United Russia
+
+• Home_Ballots (or your name): percent of people, who voted at home
+
+• Invalid (or your name): percent of invalid ballots
+
+• Turnout: turnout on the elections in Karelia
+
+```{r}
+library(dplyr)
+
+Karelia <- dplyr::select(Karelia2016,United_Russia,Home_Ballots_p, Invalid_p, Turnout)
+Karelia
+```
+
+6. Round the values in all four variables to 2 decimal places (hundredth).
+
+```{r}
+Karelia <- round(Karelia, digits = 2)
+Karelia
+```
+
+7. Build the following OLS model: DV = United_Russia, IVs = Home_Ballots (or your name), Invalid (or your name), Turnout.
+```{r}
+model <- lm(United_Russia ~ Home_Ballots_p + Invalid_p + Turnout, data = Karelia)
+summary(model)
+```
+
+8. Check the model for multicollinearity.
+
+a. Run the test;
+
+```{r}
+library(car)
+vif(model)
+```
+
+
+b. Indicate whether the problem is present in the model. Explain, what values and/or sections of the test output drove you to the respective conclusion.
+
+```{r}
+#The **VIF value** is smaller than 10, therefore there is no multicollinearity in the model
+```
+
+
+c. If multicollineraity is found for the respective IVs, remove one of them (any) from the model
+
+NB: If you identified the problem and fixed it, use the fixed model for further operations!
+
+9. Check the model for the normality of regression residuals’ distribution.
+
+a. Build a Q-Q plot;
+
+Interpret the plot's outlook: which element(s) and their positioning can be used in order to make an assumption about the presence/absence of the problem?
+
+```{r}
+qqPlot(model, main="Q-Q Plot for non-corrected model")
+```
+```{r}
+# Most of the observations are out of the range of the blue accaptable range thefore it indicates that the problem exists
+```
+
+
+b. Run the test;
+
+```{r}
+summary(powerTransform(Karelia$United_Russia)) ## DV, not model
+```
+
+
+c. Indicate whether the problem is present in the model. Explain, which values and/or sections of the test output drove you to the respective conclusion;
+
+```{r}
+#Test for lambda(1) indicates that the p-value is < 0.05 therefore we can reject the H0 (that residuals are normally distributed) so they are not normal and the problem exists
+``` 
+
+
+d. If the problem does exist, fix it with the respective tool.
+
+```{r}
+model1<-lm(bcPower(United_Russia, -0.4493)~ Home_Ballots_p + Invalid_p + Turnout, data = Karelia)
+summary(model1)
+```
+
+
+NB: If you identified the problem and fixed it, use the fixed model for further operations!
+
+```{r}
+qqPlot(model1, main="Q-Q Plot for corrected model")
+```
+
+
+10. Check the model for nonlinearity of relationship between the DV and any of the IVs (one).
+
+a. Build crPlots;
+
+```{r}
+crPlots(model1)
+```
+
+
+Interpret the plot's outlook: which element(s) and their positioning can be used in order to make an assumption about the presence/absence of the problem?
+
+```{r}
+# The pink should correspond to the blue one. However in our case in Home_Ballots_p we see certain problems with it while in other two variables the pink almost perfectly corresponds with blue line. So probably we have problems but not in all variables. 
+```
+
+
+b. Run the test;
+
+### We need positive values so we need to get rid of minus values
+
+```{r}
+Karelia_positive <- Karelia**2+1
+Karelia_positive
+```
+
+
+```{r}
+boxTidwell(United_Russia ~ Home_Ballots_p, data = Karelia_positive)
+```
+
+
+c. Indicate whether the problem is present in the model. Explain, which values and/or sections of the test output drove you to the respective conclusion;
+
+```{r}
+# Problem is present for `Home_Ballots_p` variable as p-value is smaller than 0.05 which indicates the problem of non-linearity statistically does exist
+```
+
+
+d. If the problem does exist, fix it with the respective tool.
+
+```{r}
+Karelia_positive$Home_Ballots_p <- (Karelia_positive$Home_Ballots_p)^-279.36
+Karelia_positive
+```
+
+```{r}
+model2<-lm(bcPower(United_Russia, -0.4493)~ Home_Ballots_p + Invalid_p + Turnout, data = Karelia_positive) 
+summary(model2)
+
+### I am transforming United_Russia variable due to normality of residuals fixing problem. We have fixed the variable and now using the fixed version of it
+```
+```{r}
+crPlots(model2)
+```
+
+11. Use the stargazer package to draw the table with regression output. Do not include R-squared and F- statistic in the table. (for this task use the final version of the corrected model)
+
+
+```{r}
+library(stargazer)
+
+stargazer(model2, 
+          type="html",
+          model.numbers = FALSE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("United Russia"), 
+          covariate.labels=c("Home voting","Invalid ballots","Turnout"),
+          omit.stat = c("f","rsq"),
+          out="Elections_Karelia.html") 
+```
+

@@ -1,0 +1,248 @@
+---
+title: "Seminar 11"
+author: "Aleksei Sorbale"
+date: "2023-04-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Run the car package with Duncan dataset and diagnostics instruments
+
+```{r}
+
+library(car)
+```
+
+```{r}
+
+attach(Duncan)
+
+Seminar_diagnostics<-lm(income~education+prestige)
+summary(Seminar_diagnostics)
+```
+
+## Task 1. Diagnostics for outliers
+
+If the **Bonferroni p-value** for the observation is smaller than 0.05, then this case is a clear outlier
+
+```{r}
+
+outlierTest(Seminar_diagnostics) # The outlier is in line 6
+Duncan[6,] # Let's look what this case is
+```
+
+## Task 2. Diagnostics for influential observations
+
+If the Cook's distance for particular observation(s) does exceed 1, then this should be treated as influential observation(s)
+
+```{r}
+
+plot(Seminar_diagnostics, which = 4, cook.levels = 1)#"cook.levels = 1" - identify the default Cook's distance, "which" - number of plot in a series
+abline(h=1, lty=2, col="red")
+
+```
+
+## Task 3. Diagnostics for heteroscedasticity
+
+### 1. Test
+
+If the p-value is bigger than 0.05, there is no heteroscedasticity in the model
+
+```{r}
+
+ncvTest(Seminar_diagnostics)
+```
+
+### 2. Visualization
+
+If the blue dashed trendline is going up or down (**not being horizontal**) and pink reference line is varying (**not being flat**) one can assume the problem of non-constant DV variance (aka heteroscedasticity)
+
+**NOTE**: visualization is ONLY the **supplementary material**, one should make conclusions about the existence/absence of the problem taking the test's output
+
+```{r}
+
+spreadLevelPlot(Seminar_diagnostics)
+```
+
+### **3. Algorithm of heteroscedasticity fix**
+
+Consider the example:
+
+```{r}
+
+detach(Duncan)
+attach(Wool)
+
+m_ncv<-lm(cycles ~ len + amp)
+summary(m_ncv)
+```
+
+```{r}
+
+ncvTest(m_ncv)
+```
+
+Build a model with **robust (non-biased) standard errors** to correct the problem:
+
+```{r}
+
+library(sandwich)
+library(lmtest)
+coeftest(m_ncv, vcovHC(m_ncv))# "vcovHC" - transforming model's standard errors to robust ones - > correction of heteroskedasticity
+```
+
+More information about the operation:
+
+```{r}
+
+?hccm
+```
+
+## Task 4. Diagnostics for multicollinearity
+
+If the **VIF value** is smaller than 10, there is no multicollinearity in the model
+
+```{r}
+
+detach(Wool)
+attach(Duncan)
+
+vif(Seminar_diagnostics)
+```
+
+## Task 5. Diagnostics for normality of residuals distribution
+
+### 1. Test
+
+If p\>0.05 for `lambda = (1)`, then the **Box-Cox DV transformation** is not necessary (statistically there is no problem of non-normality of residuals distribution) \--\> **no correction needed**
+
+H0: The distribution of residuals is normal (p > 0.05 -> no problem)
+
+```{r}
+
+summary(powerTransform(income)) ## DV, not model
+```
+
+If p\<0.05 for `lambda = (1)`, the **Box-Cox transformation** is needed. Consider the following example:
+
+```{r}
+
+detach(Duncan)
+attach(Wool)
+
+m0<-lm(cycles ~ len + amp)
+summary(m0)
+
+p1<-summary(powerTransform(cycles))
+p1
+```
+
+### **2. Algorithm of** non-normality of residuals distribution **fix**
+
+```{r}
+
+m1<-lm(bcPower(cycles, -0.0473)~ len + amp)#-0.0473 -- lambda value given by the test for the DV transformation
+summary(m1)
+```
+
+### 3. Visualization 
+
+If any points on the plot are **beyond the boundaries of the two lines** (confidence intervals) one can assume a violation of the assumption about the normal distribution of residuals
+
+```{r}
+
+qqPlot(m0, main="Q-Q Plot for non-corrected model")
+qqPlot(m1, main="Q-Q Plot for corrected model")
+```
+
+**NOTE**: visualization is ONLY the **supplementary material**, one should make conclusions about the existence/absence of the problem taking the test's output
+
+## Task 6. Diagnostics for non-linearity
+
+### 1. Visualization 
+
+The non-linearity (non fitting) of component and residuals trends assumes a non-linear relationship between the IV and DV
+
+```{r}
+
+attach(Duncan)
+
+crPlots(Seminar_diagnostics)
+```
+
+**NOTE**: visualization is ONLY the **supplementary material**, one should make conclusions about the existence/absence of the problem taking the test's output
+
+### 2. Test 
+
+If p\>0.05 for `MLE of lambda` of the respective IV, the **Box-Tidwell transformation** is not necessary (the problem of non-linearity statistically does not exist) \--\> **no correction needed**
+
+```{r}
+
+boxTidwell(income~education+prestige)
+```
+
+If p\<0.05 for `MLE of lambda` of the respective IV, the **Box-Tidwell transformation** is needed. Consider the following example:
+
+```{r}
+
+detach(Duncan)
+attach(Prestige)
+
+m_box<-lm(prestige~income+education)
+summary(m_box)
+
+box<-boxTidwell(prestige~income+education)
+box
+```
+
+### **3. Algorithm of** non-linearity **fix**
+
+```{r}
+
+Prestige$income<-(Prestige$income)^-0.0020081 #-0.0020081 is the transformation value proposed for the 'income" IV by the test
+
+m_box_correct<-lm(prestige~Prestige$income+education)
+summary(m_box_correct)
+```
+
+```{r}
+
+detach(Prestige)
+```
+
+## 
+Practice. UN data
+
+1\. Import the dataset `World_data.csv` (delimiter: `sep = ","`)
+
+```{r}
+library(readr)
+```
+
+
+```{r}
+UN <- read_csv("~/0_programming/0_prog/0_HSE_study/колы/12/Data/World_data.csv")
+UN
+```
+
+```{r}
+UN[-2] <- UN[-2]**2
+UN
+```
+
+2\. Build the following OLS model: DV - `Political_Stability`, IVs: `Government_Effectiveness`, `Rule_of_Law`, `GDP_per_capita`, `Population_growth`
+
+3\. Check the model for outliers
+
+4\. Check the model for influential observations. If the model contains influential observations, **delete them**!
+
+5\. Check the model for heteroscedasticity.
+
+6\. Check the model for multicollinearity
+
+7\. Check the model for the normality of distribution of regression residuals. Build a Q-Q plot and use `powerTransform()` to understand whether the model is damaged by the potential non-normal distribution of residuals
+
+8\. Check the model for non-linearity of relationship between the DV and IVs. Visualize the relationship between DV and IVs with `crPlots()`. Run `boxTidwell()` to understand whether the model is damaged by the potential non-linear relationship between the DV and IVs

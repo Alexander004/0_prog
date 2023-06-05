@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-05-24"
+---
+
+```{r}
+library(readr)
+democracy_AER <- read_csv("Data/democracy_AER.csv")
+democracy_AER
+```
+```{r}
+library(dplyr)
+democracy_AER <- dplyr::select(democracy_AER,country_name,year,id,dem,lgdp)
+democracy_AER
+```
+```{r}
+democracy_AER <- democracy_AER %>% filter(year >= 1991 & year <= 2008)
+democracy_AER <- democracy_AER %>% filter(country_name == "Estonia" | 
+                                          country_name == "Georgia" | 
+                                          country_name == "Kyrgyz Republic" |
+                                          country_name == "Latvia"  |
+                                          country_name == "Moldova" | 
+                                          country_name == "Tajikistan" | 
+                                          country_name == "Turkmenistan"  | 
+                                          country_name == "Ukraine" | 
+                                          country_name == "Uzbekistan")
+democracy_AER
+```
+```{r}
+library(plm) 
+library(readr)
+library(car)     
+library(gplots) 
+library(tseries)   
+library(lmtest)  
+dataPanel <- pdata.frame(democracy_AER, index=c("id", "year"))
+dataPanel
+```
+```{r}
+coplot(lgdp ~ year|id, type="b", data=dataPanel)
+```
+```{r}
+ols <-lm(lgdp ~ dem, data = dataPanel)
+summary(ols)
+```
+```{r}
+fixed <- plm(lgdp ~ dem, data=dataPanel, model="within")
+summary(fixed)
+```
+```{r}
+#**H0**: The fit of basic OLS model is better than the one of the model with country-fixed effects.
+#If p\<0.05, **one can reject** H0 -> Fixed model is better
+pFtest(fixed, ols)
+```
+```{r}
+random <- plm(lgdp ~ dem, data=dataPanel, model="random")
+summary(random)
+```
+```{r}
+#p-value smaller than 0.05 -> can reject H0 -> random effects model is worse than the fixed effects model
+phtest(fixed, random)
+```
+```{r}
+library(stargazer)
+
+stargazer(fixed, 
+          type="html",
+          model.numbers = FALSE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("GDP per capita logarithmized"), 
+          covariate.labels=c("Democracy level"),
+          omit.stat = c("f","rsq"),
+          out="fixed.html") 
+```
+

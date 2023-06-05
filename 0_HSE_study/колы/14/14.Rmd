@@ -1,0 +1,147 @@
+---
+title: "Seminar 14"
+author: "Aleksei Sorbale"
+date: "2023-05-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(nnet)
+```
+
+## Task 1. Prepare the data for logistic regression
+
+```{r}
+library(readr)
+opinion_2012 <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/14/Data/data2012_mneniye.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+attach(opinion_2012) 
+```
+
+In the column `Vote` 1 means voting for Zhirinovsky; 2 -- for Zyuganov; 3 -- for Mironov; 4 -- for Prokhorov; 5 -- for Putin
+
+In the column `Gender` 2 means female, 1 -- male
+
+**What factors increase the probability of voting for Putin?**
+
+Let us check the factors related to gender, age and willingness to participate in the protests
+
+But firstly **filter the data, remove the NAs**.
+
+```{r}
+opinion_new<-as.data.frame(cbind(Gender, Vote, Age, Protest))
+opinion_new_NAs<-na.omit(opinion_new)
+attach(opinion_new_NAs)
+```
+
+## Task 2. Data calibration for logistic regression
+
+Set the vote for Putin as 1, and for the rest -- as 0
+
+```{r}
+putin_one<-ifelse(Vote==5, 1, 0)
+```
+
+Set the willingness to participate in protest actions as 1, and the absence of such willingness as 0
+
+```{r}
+Protest_one<-ifelse(Protest==1, 1, 0)
+```
+
+Gender: 1 -- female, 0 -- male (in the initial data set, female was designated as 2, and male as 1)
+
+```{r}
+Gender_one<-ifelse(Gender==2, 1, 0)
+```
+
+## Task 3. Logistic regression
+
+Run two logistic regressions
+
+```{r}
+putin_glm_1<-glm(putin_one ~ Gender_one + Age + Protest_one, data=  opinion_new_NAs, family = binomial(link = "logit"))
+summary(putin_glm_1)
+
+putin_glm_2<-glm(putin_one ~ Gender_one  + Protest_one, data= opinion_new_NAs, family = binomial(link = "logit"))
+summary(putin_glm_2)
+```
+
+**Calculate the log-likelihood value**
+
+```{r}
+logLik(putin_glm_1) 
+
+logLik(putin_glm_2)
+```
+
+The bigger the log-likelihood value, the better the model in terms of predictive capability
+
+### Task 3.1. Predicted probabilities
+
+Two methods for calculating the model's predicted probabilities for regression coefficients
+
+**Method 1**
+
+```{r}
+prob_putin<-fitted(putin_glm_1) 
+
+prob_putin
+```
+
+**Method 2**
+
+```{r}
+prob_putin_2<-predict(putin_glm_1, type = "response") 
+
+prob_putin_2
+```
+
+**Make the combinations for predicted probabilities more illustrative**
+
+```{r}
+opinion_modified<-data.frame(Vote, putin_one, Gender_one, Age, Protest_one, prob_putin)
+opinion_modified
+```
+
+### Task 3.2. Odds ratio
+
+```{r}
+exp(coef(putin_glm_1)) # Method 1
+exp(putin_glm_1$coefficients) # Method 2
+```
+
+`OR>1` for beta-coefficient = IV is valid for the prediction of DV taking the value of 1
+
+**Calculate confidence intervals for odds ratio**
+
+```{r}
+exp(confint(putin_glm_1))
+```
+
+## Practice. Voting for Zhirinovskii
+
+1.  Filter the data, so that only the variables `Gender`, `Vote`, `Education` and `Protest` remain
+
+2.  Remove the NAs.
+
+3.  Prepare the variables:
+
+    3.1. Set the vote for `Zhirinovskii` as 1, and for other candidates as 0.
+
+    3.2. Set the `willingness to participate in protest activities` as 1, and the absence of such willingness as 0.
+
+    3.3. Set female in the `Gender` variable as 1, male - as 0.
+
+    3.4. Leave `Education` variable as it is.
+
+4.  Create the logistic regression model: DV = vote for `Zhirinovskii`, IVs = `Willingness to participate in the protests`, `Gender`, `Education`
+
+5.  Calculate the predicted probabilities for the model. Put them into dataframe for better illustration.
+
+6.  Calculate odds ratio.
+
+7.  Calculate confidence intervals for odds ratio.
