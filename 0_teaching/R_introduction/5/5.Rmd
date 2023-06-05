@@ -1,0 +1,12 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-06-04"
+---
+
+```{r}
+library(readr)
+BikeData <- read_csv("D:/Users/Саня/Documents/0_prog/0_teaching/R_introduction/5/BikeData.csv")
+BikeData
+```
+
