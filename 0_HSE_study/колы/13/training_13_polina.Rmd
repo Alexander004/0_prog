@@ -1,0 +1,53 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-05-24"
+---
+
+```{r}
+library(readr)
+d <- read_csv("Data/democracy_AER.csv")
+d <- d[c("country_name", "year", "id", "dem","lgdp" )]
+d <- d[(d$year >= 1991 & d$year <= 2008),]
+d <- d[(d$country_name == "Estonia" | d$country_name == "Georgia" | d$country_name == "Kyrgyz Republic" | d$country_name == "Latvia"  | d$country_name == "Moldova" | d$country_name == "Tajikistan" | d$country_name == "Turkmenistan"  | d$country_name == "Ukraine" | d$country_name == "Uzbekistan"),]
+d
+```
+```{r}
+library(plm) 
+library(readr)
+library(car)     
+library(gplots) 
+library(tseries)   
+library(lmtest)  
+dataPanel <- pdata.frame(d, index=c("id", "year"))
+coplot(lgdp ~ year|id, type="b", data=dataPanel)
+```
+```{r}
+o <-lm(lgdp ~ dem, data = dataPanel)
+summary(o)
+f <- plm(lgdp ~ dem, data=dataPanel, model="within")
+summary(f)
+```
+```{r}
+#Fixed model is better because p-value is smaller than 0.05
+pFtest(f, o)
+```
+```{r}
+r <- plm(lgdp ~ dem, data=dataPanel, model="random")
+summary(r)
+```
+```{r}
+#Fixed model is better because p-value is bigger than 0.05
+phtest(f, r)
+```
+```{r}
+library(stargazer)
+stargazer(f, 
+          type="html",
+          model.numbers = FALSE,
+          title="Table 1. Regression Results",
+          dep.var.labels=c("LGDP"), 
+          covariate.labels=c("Democracy level"),
+          omit.stat = c("f","rsq"),
+          out="cool_model.html") 
+```

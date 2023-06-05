@@ -1,0 +1,104 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-06-02"
+---
+
+```{r}
+library(readr)
+c <- read_csv("C:/Users/Alex/Downloads/c (1).csv")
+c
+```
+```{r}
+mean(c$Other_Sales)
+median(c$Other_Sales)
+max(c$Other_Sales)
+```
+```{r}
+library(dplyr)
+c1 <- c %>% filter(Platform == "PS2")
+c1
+```
+```{r}
+united <- c$EU_Sales + c$NA_Sales
+sd(united)
+```
+```{r}
+f <- c %>% filter(Publisher == "Nintendo")
+round(mean(f$Critic_Score, na.rm = TRUE),2)
+```
+```{r}
+?mean
+```
+
+```{r}
+sum(is.na(c$Critic_Score))
+```
+
+```{r}
+plot(c$Global_Sales,c$NA_Sales)
+```
+
+```{r}
+model1 <- lm(c$Other_Sales ~ c$NA_Sales + c$JP_Sales)
+summary(model1)
+```
+```{r}
+# 27
+# Replace missing values with the median
+c$Critic_Score[is.na(c$Critic_Score)] <- median(c$Critic_Score, na.rm = TRUE)
+# Calculate the average of the transformed attribute
+average_score <- mean(c$Critic_Score)
+# Print the average score
+print(average_score)
+```
+```{r}
+# 30
+# Calculate correlation matrix
+cor_matrix <- cor(c[, sapply(c, is.numeric)], use = "pairwise.complete.obs")
+
+# Find variable with highest absolute correlation with 'NA_Sales'
+corr_with_NA_Sales <- cor_matrix["NA_Sales", ]
+corr_with_NA_Sales <- abs(corr_with_NA_Sales[-which(names(corr_with_NA_Sales) == "NA_Sales")])
+
+# Get variable with highest absolute correlation
+highest_correlation <- max(corr_with_NA_Sales)
+
+# Print the module of the resulting correlation value
+print(highest_correlation)
+
+```
+```{r}
+corr_with_NA_Sales
+```
+```{r}
+
+# Fit linear regression model
+model <- lm(Other_Sales ~ NA_Sales + JP_Sales, data = c)
+
+# Make predictions on the training sample
+predictions <- predict(model, newdata = c)
+
+# Calculate mean absolute error
+MAE <- mean(abs(predictions - c$Other_Sales))
+
+# Print the value of MAE
+print(MAE)
+
+```
+
+```{r}
+library(Metrics)
+```
+```{r}
+#32
+library(Metrics)
+mae(c$Other_Sales, predict(model))
+mse(c$Other_Sales, predict(model))
+```
+
+```{r}
+counts <- table(c$Genre)
+barplot(counts)
+```
+

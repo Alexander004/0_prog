@@ -1,0 +1,131 @@
+---
+title: "Seminar 13"
+author: "Aleksei Sorbale"
+date: "2023-05-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("tseries")
+```
+
+
+```{r}
+library(plm) 
+library(readr)
+library(car)     
+library(gplots) 
+library(tseries)   
+library(lmtest)  
+```
+
+## Task 1. Data preparation
+
+```{r}
+dataPanel<-read_csv("https://github.com/ds777/sample-datasets/blob/master/dataPanel101.csv?raw=true")
+attach(dataPanel)
+colnames(dataPanel)=c("country", "year", "income", "income_binary", "governance_index", "stability_index", "freedom_index", "opinion")
+
+dataPanel <- pdata.frame(dataPanel, index=c("country", "year"))
+dataPanel.
+#set the data as panel
+```
+
+## Task 2. Data exploration: general heterogeneity
+
+The bars at top indicate the countries' position from left to right starting on the bottom row.
+
+```{r}
+coplot(income ~ year|country, type="b", data=dataPanel)#type=b: bivariate, e.g. for two conditions (time and country) at once
+
+```
+
+## Task 3. Panel data modelling. Country effects
+
+### Task 3.1. OLS regression, which is not controlling for heterogeneity across countries and time
+
+**Option 1**
+
+```{r}
+ols <-lm(income ~ governance_index + freedom_index + stability_index, data = dataPanel)
+summary(ols)
+```
+
+**Option 2**
+
+```{r}
+pool <- plm(income ~ governance_index + freedom_index + stability_index, data=dataPanel, model="pooling")
+summary(pool)
+```
+
+### Task 3.2. Fixed effects model, which does consider heterogeneity across countries
+
+`Assumption`: the individual effects of countries are fixed, i.e. country-specific effects are correlated with the independent variables
+
+```{r}
+fixed <- plm(income ~ governance_index + freedom_index + stability_index, data=dataPanel, model="within")
+summary(fixed)
+```
+
+Does model with country-fixed effects have better fit comparing to basic OLS?
+
+**H0**: The fit of basic OLS model is better than the one of the model with country-fixed effects.
+
+If p\<0.05, **one can reject** H0
+
+```{r}
+pFtest(fixed, ols)
+```
+
+### Task 3.3. Random effects model, which does consider heterogeneity across countries
+
+`Assumption`: the individual effects of countries are random, i.e. country-specific effects are NOT correlated with the independent variables
+
+```{r}
+random <- plm(income ~ governance_index + freedom_index + stability_index + factor(year), data=dataPanel, model="random")
+summary(random)
+```
+
+### Task 3.4. Which model is better: with fixed or random effects?
+
+**H0**: country-specific standard errors are NOT correlated with the IVs -\> random effects model is better than the fixed effects model
+
+```{r}
+phtest(fixed, random)
+```
+
+## Practice. Productivity in the US
+
+1\. Import the dataset `productivity.csv`(delimiter: `sep=","`)
+
+```{r}
+Productivity<-read.csv('C:/Users/.../productivity.csv', sep=',')
+```
+
+2\. Set the data as panel. Effects to control: `STATE` and `YR`
+
+3\. Build the following OLS model. DV: `GSP`, IVs: `PC`, `HWY`, `P_CAP`, `UNEMP`
+
+**Legend**:
+
+`P_CAP` = public capital
+
+`HWY` = highway capital
+
+`PC` = private capital
+
+`GSP` = gross state product
+
+`UNEMP` = unemployment rate
+
+4\. Build fixed effects model, which does consider heterogeneity across the US states
+
+5\. Compare the fixed effects model with the basic OLS (from point 3) to understand, which model is better
+
+6\. Build random effects model, which does consider heterogeneity across the US states
+
+7\. Compare the fixed effects model with the random effects model to understand, which model is better

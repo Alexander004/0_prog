@@ -1,0 +1,68 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-05-10"
+---
+
+```{r}
+library(readr)
+K <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/11/Data/Karelia2016.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+K
+```
+```{r}
+Turnout <- (K$Com_Ballots + K$Home_Ballots)/K$Voters
+Invalid_votes <- K$Invalid/K$Voters
+Home_votes <- K$Home_Ballots/(K$Com_Ballots + K$Home_Ballots)
+K <- cbind(K,Turnout,Invalid_votes,Home_votes)
+```
+```{r}
+K1 <- K[,c("United_Russia","Turnout","Invalid_votes","Home_votes")]
+K1 <- round(K1, digits = 3)
+```
+```{r}
+M <- lm(United_Russia ~ Home_votes + Invalid_votes + Turnout, data = K1)
+summary(M)
+```
+```{r}
+library(car)
+outlierTest(M)
+```
+100's observation is outlier (Bonferroni p < 0.05)
+
+```{r}
+plot(M, which = 4, cook.levels = 1)
+abline(h=1, lty=2, col="red")
+```
+
+No influential observations because noone crosses red line
+
+```{r}
+spreadLevelPlot(M)
+```
+Blue line is going up and pink doesnt really correspond to blue so probably we have a problem of heteroscedasticity
+
+```{r}
+ncvTest(M)
+```
+p value is smaller than 0.05 so we do have heteroscedasticity
+
+```{r}
+library(sandwich)
+library(lmtest)
+M1 <- coeftest(M, vcovHC(M))
+```
+
+```{r}
+library(stargazer)
+
+stargazer(model_fixed, 
+          type="html",
+          model.numbers = FALSE,
+          title="Final Results",
+          dep.var.labels=c("United Russia"), 
+          covariate.labels=c("Home voting","Invalid ballots","Turnout"),
+          omit.stat = c("f"),
+          out="M1.html") 
+```
+

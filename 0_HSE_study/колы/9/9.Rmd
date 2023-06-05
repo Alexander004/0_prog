@@ -230,11 +230,13 @@ library(stargazer)
 
 # Create a variable summarizing the results of small parties
 small_parties <- c("Yabloko", "RPPS", "Rodina", "Zelenye", "PNS", "GP", "GS")
+
+df$`Small parties 2` = df$Yabloko+df$RPPS+df$Rodina
 df <- df %>%
   mutate(`Small parties` = rowSums(select(., all_of(small_parties))))
 
 # Transform variables to percentages
-df[, -1] <- df[, -1]/100
+#enpg[, -1] <- enpg[, -1]/100
 
 # Model 1: DV = ER
 model1 <- lm(ER ~ Turnout + PR, data = df)
@@ -256,13 +258,16 @@ beta4 <- round(coef(model4)[-1], 3)
 model5 <- lm(`Small parties` ~ Turnout + PR, data = df)
 beta5 <- round(coef(model5)[-1], 3)
 
-# Calculate standardized beta coefficients for model 1
-summary(model1)$coefficients[, "Std. Error"]
-std_beta1 <- round(coef(model1)[-1] / summary(model1)$coefficients[, "Std. Error"], 3)
-
-
-
 ```
+```{r}
+# Calculate standardized beta coefficients for model 1
+lm.beta(model1)
+```
+```{r}
+confint(model1, level=0.99)
+```
+
+
 ```{r}
 
 

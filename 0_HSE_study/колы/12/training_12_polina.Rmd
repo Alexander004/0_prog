@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-05-16"
+---
+
+```{r}
+library(readr)
+K <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/12/Data/Karelia2016.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+K
+```
+```{r}
+Turnout <- (K$Com_Ballots + K$Home_Ballots)/K$Voters
+Invalid_votes <- K$Invalid/K$Voters
+Home_votes <- K$Home_Ballots/(K$Com_Ballots + K$Home_Ballots)
+K <- cbind(K,Turnout,Invalid_votes,Home_votes)
+```
+```{r}
+K1 <- K[,c("United_Russia","Turnout","Invalid_votes","Home_votes")]
+K1 <- round(K1, digits = 2)
+K1
+```
+```{r}
+M <- lm(United_Russia ~ Home_votes + Invalid_votes + Turnout, data = K1)
+summary(M)
+```
+
+```{r}
+library(car)
+vif(M)
+```
+No multicollinearity because evereything is smaller than 10
+
+```{r}
+qqPlot(M, main="Q-Q Plot 1")
+```
+Observations beyond the blue zone -> problem exists
+
+```{r}
+attach(K1)
+summary(powerTransform(United_Russia))
+```
+
+Problem really exists because p-value smaller than 0.05
+
+```{r}
+MM<-lm(bcPower(United_Russia, -0.4493)~ Home_votes + Invalid_votes + Turnout, data = K1)
+summary(MM)
+```
+```{r}
+crPlots(MM)
+```
+
+Pink and blue lines do not correspond -> nonlinearity of relationship exists
+
+```{r}
+K2 <- subset(K1, United_Russia > 0 & Turnout > 0 & Invalid_votes > 0 & Home_votes > 0)
+```
+
+```{r}
+detach(K1)
+boxTidwell(bcPower(United_Russia, -0.4493) ~ Home_votes, data = K2)
+```
+
+p-value for home votes is smaller than 0.05 so non-linearity exists
+
+```{r}
+K2$Home_votes <- (K2$Home_votes)^-0.21892
+MMM<-lm(United_Russia~ Home_votes + Invalid_votes + Turnout, data = K2)
+summary(MMM)
+```
+
+```{r}
+library(stargazer)
+
+stargazer(MMM, 
+          type="html",
+          model.numbers = FALSE,
+          title="Final Results",
+          dep.var.labels=c("United Russia"), 
+          covariate.labels=c("Home voting","Invalid ballots","Turnout"),
+          omit.stat = c("f","rsq"),
+          out="M2.html") 
+```
+

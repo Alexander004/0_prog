@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+author: "Alexander Konkin"
+date: "2023-06-03"
+output: html_document
+---
+
+```{r}
+library(readr)
+df <- read_csv("C:/Users/Alex/Downloads/c (2).csv")
+df1 <- read_csv("C:/Users/Alex/Downloads/c (2).csv")
+df
+```
+```{r}
+mean(df$M1)
+min(df$M1)
+sd(df$M1)
+```
+```{r}
+library(dplyr)
+f <- df %>% filter(df$material == 'Plastic')
+mean(f$M3)
+```
+```{r}
+sum(is.na(df$M2))
+```
+
+```{r}
+df$M2[is.na(df$M2)] <- mean(df$M2, na.rm = TRUE)
+```
+
+```{r}
+ff <- df %>% filter(df$M2 > mean(df$M2, na.rm = TRUE))
+ff
+```
+```{r}
+mean(df1$M2, na.rm = TRUE)
+```
+```{r}
+plot(df$M1,df$M3)
+```
+```{r}
+m <- lm(df$M1 ~ df$M3)
+summary(m)
+```
+```{r}
+m1 <- lm(df$M3 ~ df$M1)
+summary(m1)
+```
+```{r}
+hist(df$M1, breaks = 100)
+hist(df$M2, breaks = 100)
+hist(df$M3, breaks = 100)
+```
+```{r}
+model <- lm(df1$age ~ df1$M1 + log(100 + df1$M3))
+summary(model)
+```
+```{r}
+library(Metrics)
+age = df1$age
+mae(age,predict.lm(model))
+```
+```{r}
+predict.lm(model)
+```
+

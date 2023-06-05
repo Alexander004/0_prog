@@ -1,0 +1,204 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-04-25"
+---
+
+############
+## PART 1 ##
+############
+
+Import the dataset ESS2017.csv
+Filter the dataset so that only the following variables remain:
+• trstplt: level of trust to national politicians
+
+• stfdem: level of satisfaction with the way democracy works in the country
+
+• polintr: level of interest in politics
+
+• hinctnta: household income
+
+• cntry: country
+
+3. Create two sets with these variables:
+
+• A set, which includes the observations for Russia (cntry==RU) only
+
+• A set, which includes the observations for the UK (cntry==GB) only
+
+4. The measurement for all the variables, except for polintr is a 10-scale (1-10). Still, there are observations like ‘0’, ‘77’, ‘99’, etc. which indicate no answer or no data. Remove these observations and leave only the observations of the 10-scale measurement in all the variables, except for polintr (this one is 1-4).
+
+Tip 1: For this task you can use the basic arithmetic logical operators like < and >. Please note: this operation should be done for all the variables, except for polintr
+
+```{r}
+library(readr)
+ESS2017 <- read_delim("~/0_programming/0_prog/0_HSE_study/колы/10/Data/ESS2017.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+ESS2017
+```
+```{r}
+library(dplyr)
+
+d <- dplyr::select(ESS2017,trstplt,stfdem, polintr, hinctnta, cntry)
+d
+```
+
+```{r}
+rus <- d %>% filter(cntry == "RU")
+rus
+```
+```{r}
+rus_cl <- rus %>% filter(trstplt <= 10, 0 < trstplt, 0 < stfdem, stfdem <= 10, 0 < hinctnta, hinctnta <= 10)
+rus_cl
+```
+```{r}
+eng <- d %>% filter(cntry == "GB")
+eng
+```
+```{r}
+eng_cl <- eng %>% filter(trstplt <= 10, 0 < trstplt, 0 < stfdem, stfdem <= 10, 0 < hinctnta, hinctnta <= 10)
+eng_cl
+```
+
+############
+## PART 2 ##
+############
+
+5. Set for Russia
+
+5.1 Build two paired OLS regressions:
+
+• DV = trstplt, IV = stfdem
+
+• DV = trstplt, IV = polintr
+
+5.2. Build the additive model 1: DV = trstplt, IVs = stfdem, polintr.
+
+5.3. Build the additive model 2: DV = trstplt, IVs = stfdem, polintr, hinctnta.
+
+5.4. Build the model with interaction effect: DV = trstplt, X (predictor) = stfdem, Z (moderator) = polintr.
+
+5.5. Compare paired linear regression model with the biggest R-squared, additive model 1, additive model 2 and the model with interaction effect using performance. Briefly interpret the  results: Which model(s) is the best one in terms of explanation and prediction? 
+
+5.5. Build a plot for the interaction effect. Put the captions on the plot’s axes. Briefly interpret, what the trendline of the plot shows: if there any kind of effect of the moderator on the predictor-DV relationship, and if yes, what is the direction of this effect (positive/negative).
+
+Tip 2: Check out the algorithm of the plot for interaction construction in the script for Seminar 10.
+
+5.6. Determine the interval of the moderator’s values, for which the interaction is significant (does exist). Put the 99% confidence level. Add a Johnson-Neyman plot to illustrate the effect. Briefly interpret the test results and the plot: (a) what is the interval of moderator, at which one can observe the interaction, (b) what is the probability of the interaction effect being statistically non-existent (probability of T1 error), (c) what do the colored sectors on the plot represent? 
+
+Tip 3: Check out the algorithm of the Johnson-Neyman plot construction in the script for Seminar 10
+
+NB! One should put the interpretation in point 5.6 correlant with the task. That means that it is not enough to put the interval only, but also make sense of this interval. So, the conclusion should be put in the form: "In Russia, the effect of citizens' satisfaction with the way democracy works on the level of citizens' trust to national politicians is becoming stronger/weaker under the increase/decrease of citizens' interest in politics. This interaction effect is statistically present only for citizens with high/low/medium (or variations) level of interest in politics". In order to understand the scales of the variables (low-medium-high) please check the Codebook. 
+
+```{r}
+model_rus_1 <- lm(trstplt ~ stfdem, data = rus_cl)
+summary(model_rus_1)
+```
+```{r}
+model_rus_2 <- lm(trstplt ~ polintr, data = rus_cl)
+summary(model_rus_2)
+```
+```{r}
+model_rus_add_1 <- lm(trstplt ~ stfdem + polintr, data = rus_cl)
+summary(model_rus_add_1)
+```
+
+```{r}
+model_rus_add_2 <- lm(trstplt ~ stfdem + polintr + hinctnta, data = rus_cl)
+summary(model_rus_add_2)
+```
+```{r}
+model_rus_int_1 <- lm(trstplt ~ stfdem*polintr, data = rus_cl)
+summary(model_rus_int_1)
+```
+
+```{r}
+library(performance)
+compare_performance(model_rus_1, model_rus_add_1, model_rus_add_2, model_rus_int_1)
+```
+Which model(s) is the best one in terms of explanation and prediction? 
+
+
+`model_rus_int_1` has the highest R2 (adj.) 0.315 and has the highest explanatory capacities. Also AIC, AICc, BIC, RMSE, Sigma should be the smaller. As the better model model is when it can predict on smaller sample of values. In our case `model_rus_int_1` has the lowest parameters in all cases and has the biggest prediction capacities as well.
+
+```{r}
+library(interplot)
+interplot(m = model_rus_int_1,
+           var1 = "stfdem",
+           var2 = "polintr",  hist = T) +
+  xlab("Level of trust to national politicians") +
+  ylab("Marginal effect of level of satisfaction with the way democracy works in the country") +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  geom_vline(xintercept = 0, linetype="dashed")
+```
+The direction of this effect is negative. The bigger the `polintr` (1-4) the smaller the effect of satisfaction with the way democracy works in the country is on level of trust to national politicians.
+```{r}
+library(interactions)
+options(width = 60)
+johnson_neyman(model_rus_int_1,
+               pred = "stfdem",  modx = "polintr",  alpha = 0.01)
+```
+the interval is - [1 to 2.33]
+the probability of the interaction effect being statistically non-existent is 1% (with 99% of confidence level)
+blue - when the interaction effect is significant, red when non significant 
+
+1 - very interested
+4 - not interested
+
+In Russia, the effect of citizens' satisfaction with the way democracy works on the level of citizens' trust to national politicians is becoming stronger under the increase of citizens' interest in politics. This interaction effect is statistically present only for citizens with high [1 to 2.33] level of interest in politics
+
+```{r}
+model_eng_1 <- lm(trstplt ~ stfdem, data = eng_cl)
+summary(model_eng_1)
+```
+```{r}
+model_eng_2 <- lm(trstplt ~ polintr, data = eng_cl)
+summary(model_eng_2)
+```
+```{r}
+model_eng_add_1 <- lm(trstplt ~ stfdem + polintr, data = eng_cl)
+summary(model_eng_add_1)
+```
+
+```{r}
+model_eng_add_2 <- lm(trstplt ~ stfdem + polintr + hinctnta, data = eng_cl)
+summary(model_eng_add_2)
+```
+```{r}
+model_eng_int_1 <- lm(trstplt ~ stfdem*polintr, data = eng_cl)
+summary(model_eng_int_1)
+```
+
+```{r}
+
+library(performance)
+compare_performance(model_eng_1, model_eng_add_1, model_eng_add_2, model_eng_int_1)
+```
+Which model(s) is the best one in terms of explanation and prediction? 
+
+In this case the situation is not so clear. After the deleting the 0 values it shows us that the interaction model doesn't actually the highest explanation nor prediction capacities. The `model_eng_1` has the highest prediction capacities as the AIC, AICc and BIC are the lowest as well it has a better R2 (adj.).
+
+However, in order to continue the task properly we will use the interaction model while it has the highest R2 and smallest RMSE.
+
+```{r}
+library(interplot)
+interplot(m = model_eng_int_1,
+           var1 = "stfdem",
+           var2 = "polintr",  hist = T) +
+  xlab("Level of trust to national politicians") +
+  ylab("Marginal effect of level of satisfaction with the way democracy works in the country") +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  geom_vline(xintercept = 0, linetype="dashed")
+```
+The direction of this effect is positive. The more people are interested in national politics the bigger the effect of satisfaction with the way democracy works in the country is on level of trust to national politicians.
+```{r}
+library(interactions)
+options(width = 60)
+johnson_neyman(model_eng_int_1,
+               pred = "stfdem",  modx = "polintr",  alpha = 0.001)
+```
+the interval is - [2.31, 2.54]
+the probability of the interaction effect being statistically non-existent is 0,1% (with 99,9% of confidence level)
+blue - when the interaction effect is significant, red when non significant 
+
+In UK, the effect of citizens' satisfaction with the way democracy works on the level of citizens' trust to national politicians is becoming weaker under the increase of citizens' interest in politics. This interaction effect is statistically present only for citizens with medium [2.31, 2.54] level of interest in politics
